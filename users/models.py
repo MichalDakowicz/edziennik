@@ -10,8 +10,9 @@ THEME_CHOICES = [
 # Create your models here.
 class Uczen(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    telefon = models.CharField(max_length=20, null=True, blank=True)
     # klasa = models.ForeignKey(Klasa, on_delete=models.SET_NULL, null=True, blank=True, related_name='uczniowie')
+
+    telefon = models.CharField(max_length=20, null=True, blank=True)
     data_urodzenia = models.DateField()
     # adres = models.ForeignKey(Adres, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -25,6 +26,7 @@ class Uczen(models.Model):
 
 class Nauczyciel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
     telefon = models.CharField(max_length=20)
 
     def __str__(self):
@@ -37,7 +39,9 @@ class Nauczyciel(models.Model):
 
 class Rodzic(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
     telefon = models.CharField(max_length=20)
+    
     dzieci = models.ManyToManyField(Uczen, related_name="rodzice")
 
     def __str__(self):
@@ -46,6 +50,7 @@ class Rodzic(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
     theme_preference = models.CharField(
         max_length=10,
         choices=THEME_CHOICES,
