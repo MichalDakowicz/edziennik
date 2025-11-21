@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa
 from auth.api.services import admin_key_required
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(admin_key_required, name="dispatch")
 class OcenaApiView(View):
@@ -25,6 +26,12 @@ class OcenaApiView(View):
                 return JsonResponse({"error": "Ocena not found"}, status=404)
         else:
             oceny = Ocena.objects.all()
+
+            # Filter by user_id if provided
+            user_id = request.GET.get("user_id")
+            if user_id:
+                oceny = oceny.filter(uczen_id=user_id)
+
             data = []
             for ocena in oceny:
                 data.append(
@@ -37,6 +44,7 @@ class OcenaApiView(View):
                     }
                 )
             return JsonResponse(data, safe=False)
+
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -61,6 +69,7 @@ class OcenaApiView(View):
             )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def put(self, request, pk):
         try:
             ocena = Ocena.objects.get(pk=pk)
@@ -85,6 +94,7 @@ class OcenaApiView(View):
             return JsonResponse({"error": "Ocena not found"}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def delete(self, request, pk):
         try:
             ocena = Ocena.objects.get(pk=pk)
@@ -92,8 +102,8 @@ class OcenaApiView(View):
             return JsonResponse({"message": "Ocena deleted"})
         except Ocena.DoesNotExist:
             return JsonResponse({"error": "Ocena not found"}, status=404)
-        
-        
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(admin_key_required, name="dispatch")
 class OcenaOkresowaApiView(View):
@@ -113,6 +123,12 @@ class OcenaOkresowaApiView(View):
                 return JsonResponse({"error": "OcenaOkresowa not found"}, status=404)
         else:
             oceny_okresowe = OcenaOkresowa.objects.all()
+
+            # Filter by user_id if provided
+            user_id = request.GET.get("user_id")
+            if user_id:
+                oceny_okresowe = oceny_okresowe.filter(uczen_id=user_id)
+
             data = []
             for ocena_okresowa in oceny_okresowe:
                 data.append(
@@ -125,10 +141,13 @@ class OcenaOkresowaApiView(View):
                     }
                 )
             return JsonResponse(data, safe=False)
+
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if not all(k in data for k in ("wartosc", "okres", "uczen_id", "przedmiot")):
+            if not all(
+                k in data for k in ("wartosc", "okres", "uczen_id", "przedmiot")
+            ):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             ocena_okresowa = OcenaOkresowa.objects.create(
@@ -149,6 +168,7 @@ class OcenaOkresowaApiView(View):
             )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def put(self, request, pk):
         try:
             ocena_okresowa = OcenaOkresowa.objects.get(pk=pk)
@@ -173,6 +193,7 @@ class OcenaOkresowaApiView(View):
             return JsonResponse({"error": "OcenaOkresowa not found"}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def delete(self, request, pk):
         try:
             ocena_okresowa = OcenaOkresowa.objects.get(pk=pk)
@@ -180,8 +201,8 @@ class OcenaOkresowaApiView(View):
             return JsonResponse({"message": "OcenaOkresowa deleted"})
         except OcenaOkresowa.DoesNotExist:
             return JsonResponse({"error": "OcenaOkresowa not found"}, status=404)
-        
-        
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(admin_key_required, name="dispatch")
 class OcenaKoncowaApiView(View):
@@ -201,6 +222,12 @@ class OcenaKoncowaApiView(View):
                 return JsonResponse({"error": "OcenaKoncowa not found"}, status=404)
         else:
             oceny_koncowe = OcenaKoncowa.objects.all()
+
+            # Filter by user_id if provided
+            user_id = request.GET.get("user_id")
+            if user_id:
+                oceny_koncowe = oceny_koncowe.filter(uczen_id=user_id)
+
             data = []
             for ocena_koncowa in oceny_koncowe:
                 data.append(
@@ -213,11 +240,13 @@ class OcenaKoncowaApiView(View):
                     }
                 )
             return JsonResponse(data, safe=False)
-    
+
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if not all(k in data for k in ("wartosc", "rok_szkolny", "uczen_id", "przedmiot")):
+            if not all(
+                k in data for k in ("wartosc", "rok_szkolny", "uczen_id", "przedmiot")
+            ):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             ocena_koncowa = OcenaKoncowa.objects.create(
@@ -238,13 +267,16 @@ class OcenaKoncowaApiView(View):
             )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def put(self, request, pk):
         try:
             ocena_koncowa = OcenaKoncowa.objects.get(pk=pk)
             data = json.loads(request.body)
 
             ocena_koncowa.wartosc = data.get("wartosc", ocena_koncowa.wartosc)
-            ocena_koncowa.rok_szkolny = data.get("rok_szkolny", ocena_koncowa.rok_szkolny)
+            ocena_koncowa.rok_szkolny = data.get(
+                "rok_szkolny", ocena_koncowa.rok_szkolny
+            )
             ocena_koncowa.uczen_id = data.get("uczen_id", ocena_koncowa.uczen.id)
             ocena_koncowa.przedmiot = data.get("przedmiot", ocena_koncowa.przedmiot)
             ocena_koncowa.save()
@@ -262,6 +294,7 @@ class OcenaKoncowaApiView(View):
             return JsonResponse({"error": "OcenaKoncowa not found"}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     def delete(self, request, pk):
         try:
             ocena_koncowa = OcenaKoncowa.objects.get(pk=pk)
