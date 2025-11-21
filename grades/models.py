@@ -28,23 +28,6 @@ class Ocena(models.Model):
         ordering = ['-data_wystawienia']
         
         
-class OcenaKoncowa(models.Model):
-    uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='oceny_koncowe')
-    
-    wartosc = models.DecimalField(max_digits=3, decimal_places=2) 
-    
-    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_koncowe')
-    
-    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, blank=True)
-
-    class Meta:
-        verbose_name = "Ocena końcowa"
-        verbose_name_plural = "Oceny końcowe"
-
-    def __str__(self):
-        return f"{self.uczen} - (przedmiot): {self.wartosc}" # TODO: dodać przedmiot
-
-
 class OcenaOkresowa(models.Model):
     uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='oceny_okresowe')
     
@@ -61,3 +44,21 @@ class OcenaOkresowa(models.Model):
 
     def __str__(self):
         return f"{self.uczen} - {self.przedmiot}: {self.wartosc} ({self.okres})"
+    
+        
+class OcenaKoncowa(models.Model):
+    uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='oceny_koncowe')
+    
+    wartosc = models.DecimalField(max_digits=3, decimal_places=2) 
+    
+    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_koncowe')
+    
+    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Ocena końcowa"
+        verbose_name_plural = "Oceny końcowe"
+
+    def __str__(self):
+        return f"{self.uczen} - (przedmiot): {self.wartosc}" # TODO: dodać przedmiot
+
