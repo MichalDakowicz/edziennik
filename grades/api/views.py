@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa
-from auth.api.services import admin_key_required
+from authentication.api.services import admin_key_required
 
 
 @method_decorator(csrf_exempt, name="dispatch")

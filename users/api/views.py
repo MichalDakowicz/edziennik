@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from users.models import Uczen, Nauczyciel, Rodzic, UserProfile
-from auth.api.services import admin_key_required
+from authentication.api.services import admin_key_required
 
 
 @method_decorator(csrf_exempt, name="dispatch")
