@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "clients",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -85,17 +85,50 @@ DATABASES = {
 }
 
 # Use PostgreSQL when DB credentials are provided via environment variables.
-# This keeps the default SQLite for local/dev when no DB env vars are set.
+# Keep SQLite as a safe fallback. Attempt a quick connection to Postgres and
+# only switch the Django DATABASES setting if the test connection succeeds.
 DB_NAME = config("DB_NAME", default="")
 if DB_NAME:
-    DATABASES["default"] = {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": DB_NAME,
-        "USER": config("DB_USER", default=""),
-        "PASSWORD": config("DB_PASSWORD", default=""),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
-    }
+    DB_USER = config("DB_USER", default="")
+    DB_PASSWORD = config("DB_PASSWORD", default="")
+    DB_HOST = config("DB_HOST", default="localhost")
+    DB_PORT = config("DB_PORT", default="5432")
+
+    # Try to import psycopg2 and make a short connection to verify reachability.
+    try:
+        import warnings
+
+        try:
+            import psycopg2
+
+            conn = psycopg2.connect(
+                dbname=DB_NAME,
+                user=DB_USER or None,
+                password=DB_PASSWORD or None,
+                host=DB_HOST,
+                port=DB_PORT,
+                connect_timeout=3,
+            )
+            conn.close()
+
+            DATABASES["default"] = {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": DB_NAME,
+                "USER": DB_USER,
+                "PASSWORD": DB_PASSWORD,
+                "HOST": DB_HOST,
+                "PORT": DB_PORT,
+            }
+
+        except Exception as e:
+            warnings.warn(
+                f"PostgreSQL not reachable or psycopg2 not installed; falling back to SQLite. ({e})",
+                RuntimeWarning,
+            )
+
+    except Exception:
+        # If warnings import fails for some reason, silently continue with SQLite.
+        pass
 
 
 # Password validation

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from clients.models import Uczen
+from users.models import Uczen
 from auth.api.services import admin_key_required
 
 

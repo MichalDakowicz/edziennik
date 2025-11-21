@@ -1,6 +1,6 @@
 # Odniesienia API dla dziennika
 
-## `clients` - Endpointy API dla zarządzania urzytkownikami.
+## `users` - Endpointy API dla zarządzania urzytkownikami.
 
 1. GET
 
