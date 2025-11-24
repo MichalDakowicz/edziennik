@@ -201,3 +201,6 @@ CORS_ALLOWED_ORIGINS = [
 
 # For development, you can use CORS_ALLOW_ALL_ORIGINS instead (not recommended for production)
 CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", cast=bool)
+
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
