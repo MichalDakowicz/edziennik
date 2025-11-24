@@ -1,5 +1,11 @@
 from django.urls import path
-from .views import (GodzinyLekcyjneApiView, DniTygodniaApiView, ZajeciaApiView, PlanWpisApiView, PlanyZajecApiView,
+from .views import (
+    GodzinyLekcyjneApiView,
+    DniTygodniaApiView,
+    ZajeciaApiView,
+    PlanWpisApiView,
+    PlanyZajecApiView,
+    WydarzenieApiView,
 )
 
 urlpatterns = [
@@ -17,4 +23,7 @@ urlpatterns = [
 
     path("plany-zajec/", PlanyZajecApiView.as_view(), name="plany-list"),
     path("plany-zajec/<int:pk>/", PlanyZajecApiView.as_view(), name="plany-detail"),
+    
+    path("wydarzenia/", WydarzenieApiView.as_view(), name="wydarzenia-list"),
+    path("wydarzenia/<int:pk>/", WydarzenieApiView.as_view(), name="wydarzenia-detail"),
 ]

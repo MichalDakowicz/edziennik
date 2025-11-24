@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UczenApiView, NauczycielApiView, RodzicApiView, UserProfileApiView
+from .views import UczenApiView, NauczycielApiView, RodzicApiView, UserProfileApiView, WiadomoscApiView, KlasaApiView, AdresApiView
 
 urlpatterns = [
     path("uczniowie/", UczenApiView.as_view(), name="uczen-list"),
@@ -13,4 +13,13 @@ urlpatterns = [
     
     path("userprofiles/", UserProfileApiView.as_view(), name="userprofile-list"),
     path("userprofiles/<int:pk>/", UserProfileApiView.as_view(), name="userprofile-detail"),
+    
+    path("wiadomosci/", WiadomoscApiView.as_view(), name="wiadomosc-list"),
+    path("wiadomosci/<int:pk>/", WiadomoscApiView.as_view(), name="wiadomosc-detail"),
+    
+    path("klasy/", KlasaApiView.as_view(), name="klasa-list"),
+    path("klasy/<int:pk>/", KlasaApiView.as_view(), name="klasa-detail"),
+
+    path("adresy/", AdresApiView.as_view(), name="adres-list"),
+    path("adresy/<int:pk>/", AdresApiView.as_view(), name="adres-detail"),
 ]

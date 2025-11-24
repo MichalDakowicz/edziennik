@@ -24,6 +24,7 @@ urlpatterns = [
     path("api/", include("grades.api.urls")),
     path("api/", include("timetables.api.urls")),
     path("api/", include("attendance.api.urls")),
+    path("api/", include("utils.api.urls")),
     
     path("api/auth/", include("authentication.api.urls")),
 ]

@@ -163,3 +163,133 @@
    curl.exe -X DELETE http://127.0.0.1:8000/api/userprofiles/1/ `
    -H "ADMIN-KEY: "
 ```
+
+## `Wiadomości`
+
+-   GET (lista wiadomości)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/wiadomosci/" `
+   -H "ADMIN-KEY: "
+``` 
+
+-   GET (lista wiadomości dla użytkownika, filtr user_id jako nadawca lub odbiorca)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/wiadomosci/?user_id=1" `
+   -H "ADMIN-KEY: "
+``` 
+
+-   GET (pojedyncza wiadomość)
+
+```ps
+   curl.exe -X GET http://127.0.0.1:8000/api/wiadomosci/1/ `
+   -H "ADMIN-KEY: "
+```
+
+-   POST (utworzenie wiadomości)
+
+```ps
+   curl.exe -X POST http://127.0.0.1:8000/api/wiadomosci/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"nadawca_id": 1, "odbiorca_id": 2, "temat": "Przykład", "tresc": "Treść wiadomości"}'
+```
+
+-   PUT (aktualizacja wiadomości — np. oznaczenie jako przeczytana)
+
+```ps
+   curl.exe -X PUT http://127.0.0.1:8000/api/wiadomosci/1/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"przeczytana": true}'
+```
+
+-   DELETE (usunięcie wiadomości)
+
+```ps
+   curl.exe -X DELETE http://127.0.0.1:8000/api/wiadomosci/1/ `
+   -H "ADMIN-KEY: "
+```
+
+## `Klasy`
+
+-   GET (lista klas)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/klasy/" `
+   -H "ADMIN-KEY: "
+```
+
+-   GET (pojedyncza klasa)
+
+```ps
+   curl.exe -X GET http://127.0.0.1:8000/api/klasy/1/ `
+   -H "ADMIN-KEY: "
+```
+
+-   POST (utworzenie klasy)
+
+```ps
+   curl.exe -X POST http://127.0.0.1:8000/api/klasy/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"nazwa": "A", "numer": 1, "wychowawca_id": 5}'
+```
+
+-   PUT (aktualizacja klasy)
+
+```ps
+   curl.exe -X PUT http://127.0.0.1:8000/api/klasy/1/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"nazwa": "B", "numer": 2, "wychowawca_id": 6}'
+```
+
+-   DELETE (usunięcie klasy)
+
+```ps
+   curl.exe -X DELETE http://127.0.0.1:8000/api/klasy/1/ `
+   -H "ADMIN-KEY: "
+```
+
+## `Adresy`
+
+-   GET (lista adresów)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/adresy/" `
+   -H "ADMIN-KEY: "
+```
+
+-   GET (pojedynczy adres)
+
+```ps
+   curl.exe -X GET http://127.0.0.1:8000/api/adresy/1/ `
+   -H "ADMIN-KEY: "
+```
+
+-   POST (utworzenie adresu)
+
+```ps
+   curl.exe -X POST http://127.0.0.1:8000/api/adresy/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"ulica": "Szkolna", "numer_domu": "12", "miasto": "Warszawa", "kod_pocztowy": "00-001" }'
+```
+
+-   PUT (aktualizacja adresu)
+
+```ps
+   curl.exe -X PUT http://127.0.0.1:8000/api/adresy/1/ `
+   -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"miasto": "Kraków"}'
+```
+
+-   DELETE (usunięcie adresu)
+
+```ps
+   curl.exe -X DELETE http://127.0.0.1:8000/api/adresy/1/ `
+   -H "ADMIN-KEY: "
+```
