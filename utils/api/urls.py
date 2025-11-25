@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PrzedmiotApiView, TematApiView, PracaDomowaApiView
+from .views import PrzedmiotApiView, TematApiView, PracaDomowaApiView, DataSourceApiView
 
 urlpatterns = [
     path("przedmioty/", PrzedmiotApiView.as_view(), name="przedmiot-list"),
@@ -10,4 +10,5 @@ urlpatterns = [
     
     path("prace-domowe/", PracaDomowaApiView.as_view(), name="praca-list"),
     path("prace-domowe/<int:pk>/", PracaDomowaApiView.as_view(), name="praca-detail"),
+    path("datasource/", DataSourceApiView.as_view(), name="datasource"),
 ]

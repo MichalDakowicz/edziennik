@@ -4,9 +4,10 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from utils.models import Przedmiot, Temat, PracaDomowa
+from utils.models import Przedmiot, Temat, PracaDomowa, DataSource
 from django.contrib.auth.models import User
 from authentication.api.services import admin_key_required
+from django.utils import timezone
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -253,6 +254,43 @@ class PracaDomowaApiView(View):
                 termin=data["termin"],
             )
             return JsonResponse({"id": pd.id, "message": "PracaDomowa created"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class DataSourceApiView(View):
+    """API to view and update the singleton DataSource settings."""
+
+    def get(self, request):
+        try:
+            ds = DataSource.objects.get_or_create(pk=1)[0]
+            data = {
+                "active_source": ds.active_source,
+                "last_import_file": ds.last_import_file,
+                "last_imported_at": ds.last_imported_at,
+            }
+            return JsonResponse(data)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def post(self, request):
+        # set active source and optional filename
+        try:
+            data = json.loads(request.body)
+            if "active_source" not in data:
+                return JsonResponse({"error": "Missing required field: active_source"}, status=400)
+            ds = DataSource.objects.get_or_create(pk=1)[0]
+            ds.active_source = data["active_source"]
+            if "last_import_file" in data:
+                ds.last_import_file = data["last_import_file"]
+                ds.last_imported_at = timezone.now()
+            ds.save()
+            return JsonResponse({"message": "DataSource updated", "active_source": ds.active_source})
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:

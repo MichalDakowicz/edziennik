@@ -129,3 +129,20 @@ Wszystkie endpointy wymagają nagłówka `ADMIN-KEY` (tak jak inne moduły API w
    curl.exe -X DELETE http://127.0.0.1:8000/api/prace-domowe/1/ `
    -H "ADMIN-KEY: "
 ```
+
+## `DataSource` (active data source / import info)
+
+-   GET (get current active source and last import info)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/datasource/" `
+   -H "ADMIN-KEY: "
+```
+
+-   POST (set active source and optional last_import_file)
+
+```ps
+   curl.exe -X POST http://127.0.0.1:8000/api/datasource/ `  -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"active_source": "local", "last_import_file": "import.csv" }'
+```

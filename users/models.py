@@ -58,20 +58,51 @@ class Rodzic(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    THEME_CHOICES = [
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+        ('system', 'System'),
+    ]
     
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
     theme_preference = models.CharField(
         max_length=10,
         choices=THEME_CHOICES,
         default='system',
+        help_text='Choose your preferred theme'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # TOTP (Google Authenticator) fields
+    totp_secret = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text='Base32 secret used for TOTP with Google Authenticator'
+    )
+    totp_enabled = models.BooleanField(
+        default=False,
+        help_text='Whether TOTP 2FA is enabled for this user'
     )
     
     def __str__(self):
-        return f"Profil użytkownika: {self.user.username}"
+        return f"{self.user.username} - {self.get_theme_preference_display()}"
     
     class Meta:
-        verbose_name = "Profil Użytkownika"
-        verbose_name_plural = "Profile Użytkowników"
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profiles"
+
+
+    # Import audit module so its model classes are defined when Django loads app models.
+    try:
+        from . import audit  # noqa: F401
+    except Exception:
+        # If audit module fails to import, avoid breaking the models module import.
+        pass
 
 
 class Wiadomosc(models.Model):
@@ -100,7 +131,7 @@ class Klasa(models.Model):
 
     wychowawca = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='prowadzone_klasy')
-    zrodlo = models.CharField(max_length=20, choices=SOURCE_CHOICES, default=SOURCE_LOCAL, db_index=True)
+   
 
     objects = models.Manager()
     
