@@ -75,8 +75,9 @@ class UserProfile(models.Model):
         default='system',
         help_text='Choose your preferred theme'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     # TOTP (Google Authenticator) fields
     totp_secret = models.CharField(
         max_length=64,

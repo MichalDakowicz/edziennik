@@ -36,6 +36,8 @@ ALLOWED_HOSTS = config(
 # Application definition
 
 INSTALLED_APPS = [
+    
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -207,3 +209,13 @@ CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", cast=bool)
 
 import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+
+# Minimal Jazzmin configuration. You can customize colors, logos and UI
+# tweaks later; these defaults enable the Jazzmin theme with a readable
+# site title.
+JAZZMIN_SETTINGS = {
+    "site_title": "Edziennik Admin",
+    "site_header": "Edziennik",
+    "site_brand": "Edziennik",
+}
