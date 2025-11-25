@@ -65,6 +65,25 @@ class PlanWpis(models.Model):
     
 
 
+class Wydarzenie(models.Model):
+    tytul = models.CharField(max_length=200)
+    opis = models.TextField()
+    data = models.DateTimeField()
+    
+    #klasa = models.ForeignKey('Klasa', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
+    #przedmiot = models.ForeignKey('Przedmiot', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
+    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
 
+    
+    objects = models.Manager()
+    active = models.Manager()
+
+    def __str__(self):
+        return f"Wydarzenie: {self.tytul} - {self.data.strftime('%Y-%m-%d')}"
+
+    class Meta:
+        verbose_name = "Wydarzenie"
+        verbose_name_plural = "Wydarzenia"
+        ordering = ['-data']
 
 

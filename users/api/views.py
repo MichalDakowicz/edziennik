@@ -4,8 +4,10 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from users.models import Uczen, Nauczyciel, Rodzic, UserProfile
+from users.models import Uczen, Nauczyciel, Rodzic, UserProfile, Klasa, Adres
+from users.models import Wiadomosc
 from authentication.api.services import admin_key_required
+from django.db.models import Q
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -424,3 +426,262 @@ class UserProfileApiView(View):
             return JsonResponse({"error": "UserProfile not found"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class WiadomoscApiView(View):
+
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                w = Wiadomosc.objects.get(pk=pk)
+                data = {
+                    "id": w.id,
+                    "nadawca_id": w.nadawca.id,
+                    "nadawca_username": w.nadawca.username,
+                    "odbiorca_id": w.odbiorca.id,
+                    "odbiorca_username": w.odbiorca.username,
+                    "przeczytana": w.przeczytana,
+                    "temat": w.temat,
+                    "tresc": w.tresc,
+                    "data_wyslania": w.data_wyslania,
+                }
+                return JsonResponse(data)
+            except Wiadomosc.DoesNotExist:
+                return JsonResponse({"error": "Wiadomosc not found"}, status=404)
+        else:
+            user_id = request.GET.get("user_id")
+            qs = Wiadomosc.objects.all()
+            if user_id:
+                qs = qs.filter(Q(nadawca__id=user_id) | Q(odbiorca__id=user_id))
+            data = []
+            for w in qs:
+                data.append(
+                    {
+                        "id": w.id,
+                        "nadawca_id": w.nadawca.id,
+                        "nadawca_username": w.nadawca.username,
+                        "odbiorca_id": w.odbiorca.id,
+                        "odbiorca_username": w.odbiorca.username,
+                        "przeczytana": w.przeczytana,
+                        "temat": w.temat,
+                        "tresc": w.tresc,
+                        "data_wyslania": w.data_wyslania,
+                    }
+                )
+            return JsonResponse(data, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            # required fields
+            if not all(k in data for k in ("nadawca_id", "odbiorca_id", "temat", "tresc")):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            nadawca = User.objects.get(pk=data["nadawca_id"])
+            odbiorca = User.objects.get(pk=data["odbiorca_id"])
+
+            w = Wiadomosc.objects.create(
+                nadawca=nadawca,
+                odbiorca=odbiorca,
+                temat=data["temat"],
+                tresc=data["tresc"],
+            )
+            return JsonResponse({"id": w.id, "message": "Wiadomosc created"}, status=201)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method PUT requires a pk"}, status=400)
+        try:
+            w = Wiadomosc.objects.get(pk=pk)
+            data = json.loads(request.body)
+
+            if "temat" in data:
+                w.temat = data["temat"]
+            if "tresc" in data:
+                w.tresc = data["tresc"]
+            if "przeczytana" in data:
+                w.przeczytana = bool(data["przeczytana"])
+
+            w.save()
+            return JsonResponse({"message": "Wiadomosc updated"})
+        except Wiadomosc.DoesNotExist:
+            return JsonResponse({"error": "Wiadomosc not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method DELETE requires a pk"}, status=400)
+        try:
+            w = Wiadomosc.objects.get(pk=pk)
+            w.delete()
+            return JsonResponse({"message": "Wiadomosc deleted"}, status=204)
+        except Wiadomosc.DoesNotExist:
+            return JsonResponse({"error": "Wiadomosc not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class KlasaApiView(View):
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                k = Klasa.objects.get(pk=pk)
+                data = {
+                    "id": k.id,
+                    "nazwa": k.nazwa,
+                    "numer": k.numer,
+                    "wychowawca_id": getattr(k, "wychowawca_id", None),
+                }
+                return JsonResponse(data)
+            except Klasa.DoesNotExist:
+                return JsonResponse({"error": "Klasa not found"}, status=404)
+        else:
+            qs = Klasa.objects.all()
+            data = [
+                {"id": k.id, "nazwa": k.nazwa, "numer": k.numer, "wychowawca_id": getattr(k, "wychowawca_id", None)}
+                for k in qs
+            ]
+            return JsonResponse(data, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            if "nazwa" not in data and "numer" not in data:
+                return JsonResponse({"error": "Missing required field: nazwa or numer"}, status=400)
+            k = Klasa.objects.create(
+                nazwa=data.get("nazwa"),
+                numer=data.get("numer"),
+                wychowawca_id=data.get("wychowawca_id"),
+            )
+            return JsonResponse({"id": k.id, "message": "Klasa created"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method PUT requires a pk"}, status=400)
+        try:
+            k = Klasa.objects.get(pk=pk)
+            data = json.loads(request.body)
+            if "nazwa" in data:
+                k.nazwa = data["nazwa"]
+            if "numer" in data:
+                k.numer = data["numer"]
+            if "wychowawca_id" in data:
+                k.wychowawca_id = data["wychowawca_id"]
+            k.save()
+            return JsonResponse({"message": "Klasa updated"})
+        except Klasa.DoesNotExist:
+            return JsonResponse({"error": "Klasa not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method DELETE requires a pk"}, status=400)
+        try:
+            k = Klasa.objects.get(pk=pk)
+            k.delete()
+            return JsonResponse({"message": "Klasa deleted"}, status=204)
+        except Klasa.DoesNotExist:
+            return JsonResponse({"error": "Klasa not found"}, status=404)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class AdresApiView(View):
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                a = Adres.objects.get(pk=pk)
+                data = {
+                    "id": a.id,
+                    "ulica": a.ulica,
+                    "numer_domu": a.numer_domu,
+                    "numer_mieszkania": a.numer_mieszkania,
+                    "miasto": a.miasto,
+                    "kod_pocztowy": a.kod_pocztowy,
+                    "kraj": a.kraj,
+                }
+                return JsonResponse(data)
+            except Adres.DoesNotExist:
+                return JsonResponse({"error": "Adres not found"}, status=404)
+        else:
+            qs = Adres.objects.all()
+            data = [
+                {
+                    "id": a.id,
+                    "ulica": a.ulica,
+                    "numer_domu": a.numer_domu,
+                    "numer_mieszkania": a.numer_mieszkania,
+                    "miasto": a.miasto,
+                    "kod_pocztowy": a.kod_pocztowy,
+                    "kraj": a.kraj,
+                }
+                for a in qs
+            ]
+            return JsonResponse(data, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            a = Adres.objects.create(
+                ulica=data.get("ulica"),
+                numer_domu=data.get("numer_domu"),
+                numer_mieszkania=data.get("numer_mieszkania"),
+                miasto=data.get("miasto"),
+                kod_pocztowy=data.get("kod_pocztowy"),
+                kraj=data.get("kraj"),
+            )
+            return JsonResponse({"id": a.id, "message": "Adres created"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method PUT requires a pk"}, status=400)
+        try:
+            a = Adres.objects.get(pk=pk)
+            data = json.loads(request.body)
+            for field in ("ulica", "numer_domu", "numer_mieszkania", "miasto", "kod_pocztowy", "kraj"):
+                if field in data:
+                    setattr(a, field, data[field])
+            a.save()
+            return JsonResponse({"message": "Adres updated"})
+        except Adres.DoesNotExist:
+            return JsonResponse({"error": "Adres not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method DELETE requires a pk"}, status=400)
+        try:
+            a = Adres.objects.get(pk=pk)
+            a.delete()
+            return JsonResponse({"message": "Adres deleted"}, status=204)
+        except Adres.DoesNotExist:
+            return JsonResponse({"error": "Adres not found"}, status=404)

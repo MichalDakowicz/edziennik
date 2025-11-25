@@ -10,6 +10,7 @@ from timetables.models import (
     DniTygodnia,
     Zajecia,
     PlanWpis,
+    Wydarzenie,
 )
 from authentication.api.services import admin_key_required
 
@@ -342,6 +343,116 @@ class PlanyZajecApiView(View):
             return JsonResponse({"id": pl.id, "ObowiazujeOdDnia": pl.ObowiazujeOdDnia, "wpisy": [w.id for w in pl.wpisy.all()]})
         except PlanyZajec.DoesNotExist:
             return JsonResponse({"error": "PlanyZajec not found"}, status=404)
+
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class WydarzenieApiView(View):
+
+
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                w = Wydarzenie.objects.get(pk=pk)
+                data = {
+                    "id": w.id,
+                    "tytul": w.tytul,
+                    "opis": w.opis,
+                    "data": w.data,
+                    "klasa_id": getattr(w, "klasa_id", None),
+                    "przedmiot_id": getattr(w, "przedmiot_id", None),
+                    "nauczyciel_id": getattr(w, "nauczyciel_id", None),
+                }
+                return JsonResponse(data)
+            except Wydarzenie.DoesNotExist:
+                return JsonResponse({"error": "Wydarzenie not found"}, status=404)
+        else:
+            qs = Wydarzenie.objects.all()
+            klasa_id = request.GET.get("klasa_id")
+            nauczyciel_id = request.GET.get("nauczyciel_id")
+            przedmiot_id = request.GET.get("przedmiot_id")
+            if klasa_id:
+                qs = qs.filter(klasa_id=klasa_id)
+            if nauczyciel_id:
+                qs = qs.filter(nauczyciel_id=nauczyciel_id)
+            if przedmiot_id:
+                qs = qs.filter(przedmiot_id=przedmiot_id)
+
+            data = [
+                {
+                    "id": ev.id,
+                    "tytul": ev.tytul,
+                    "opis": ev.opis,
+                    "data": ev.data,
+                    "klasa_id": getattr(ev, "klasa_id", None),
+                    "przedmiot_id": getattr(ev, "przedmiot_id", None),
+                    "nauczyciel_id": getattr(ev, "nauczyciel_id", None),
+                }
+                for ev in qs
+            ]
+            return JsonResponse(data, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            if not all(k in data for k in ("tytul", "opis", "data")):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            w = Wydarzenie.objects.create(
+                tytul=data["tytul"],
+                opis=data["opis"],
+                data=data["data"],
+                klasa_id=data.get("klasa_id"),
+                przedmiot_id=data.get("przedmiot_id"),
+                nauczyciel_id=data.get("nauczyciel_id"),
+            )
+            return JsonResponse({"id": w.id, "message": "Wydarzenie created"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method PUT requires a pk"}, status=400)
+        try:
+            w = Wydarzenie.objects.get(pk=pk)
+            data = json.loads(request.body)
+
+            if "tytul" in data:
+                w.tytul = data["tytul"]
+            if "opis" in data:
+                w.opis = data["opis"]
+            if "data" in data:
+                w.data = data["data"]
+            if "klasa_id" in data:
+                w.klasa_id = data["klasa_id"]
+            if "przedmiot_id" in data:
+                w.przedmiot_id = data["przedmiot_id"]
+            if "nauczyciel_id" in data:
+                w.nauczyciel_id = data["nauczyciel_id"]
+
+            w.save()
+            return JsonResponse({"message": "Wydarzenie updated"})
+        except Wydarzenie.DoesNotExist:
+            return JsonResponse({"error": "Wydarzenie not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method DELETE requires a pk"}, status=400)
+        try:
+            w = Wydarzenie.objects.get(pk=pk)
+            w.delete()
+            return JsonResponse({"message": "Wydarzenie deleted"}, status=204)
+        except Wydarzenie.DoesNotExist:
+            return JsonResponse({"error": "Wydarzenie not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 

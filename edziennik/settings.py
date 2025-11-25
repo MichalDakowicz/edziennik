@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "grades",
     "authentication",
     "timetables",
+    "attendance",
+    "utils",
 ]
 
 MIDDLEWARE = [

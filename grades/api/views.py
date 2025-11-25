@@ -3,7 +3,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa
+from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa, ZachowaniePunkty
 from authentication.api.services import admin_key_required
 
 
@@ -302,3 +302,93 @@ class OcenaKoncowaApiView(View):
             return JsonResponse({"message": "OcenaKoncowa deleted"})
         except OcenaKoncowa.DoesNotExist:
             return JsonResponse({"error": "OcenaKoncowa not found"}, status=404)
+
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(admin_key_required, name="dispatch")
+class ZachowaniePunktyApiView(View):
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                zp = ZachowaniePunkty.objects.get(pk=pk)
+                data = {
+                    "id": zp.id,
+                    "uczen_id": zp.uczen.id,
+                    "punkty": zp.punkty,
+                    "opis": zp.opis,
+                    "data_wpisu": zp.data_wpisu,
+                    "nauczyciel_wpisujacy_id": zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None,
+                }
+                return JsonResponse(data)
+            except ZachowaniePunkty.DoesNotExist:
+                return JsonResponse({"error": "ZachowaniePunkty not found"}, status=404)
+        else:
+            user_id = request.GET.get("user_id")
+            qs = ZachowaniePunkty.objects.all()
+            if user_id:
+                qs = qs.filter(uczen_id=user_id)
+            data = []
+            for zp in qs:
+                data.append(
+                    {
+                        "id": zp.id,
+                        "uczen_id": zp.uczen.id,
+                        "punkty": zp.punkty,
+                        "opis": zp.opis,
+                        "data_wpisu": zp.data_wpisu,
+                        "nauczyciel_wpisujacy_id": zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None,
+                    }
+                )
+            return JsonResponse(data, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            if not all(k in data for k in ("uczen_id", "punkty")):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            zp = ZachowaniePunkty.objects.create(
+                uczen_id=data["uczen_id"],
+                punkty=data["punkty"],
+                opis=data.get("opis"),
+                nauczyciel_wpisujacy_id=data.get("nauczyciel_wpisujacy_id"),
+            )
+            return JsonResponse({"id": zp.id, "message": "ZachowaniePunkty created"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method PUT requires a pk"}, status=400)
+        try:
+            zp = ZachowaniePunkty.objects.get(pk=pk)
+            data = json.loads(request.body)
+            if "punkty" in data:
+                zp.punkty = data["punkty"]
+            if "opis" in data:
+                zp.opis = data["opis"]
+            if "nauczyciel_wpisujacy_id" in data:
+                zp.nauczyciel_wpisujacy_id = data["nauczyciel_wpisujacy_id"]
+            zp.save()
+            return JsonResponse({"message": "ZachowaniePunkty updated"})
+        except ZachowaniePunkty.DoesNotExist:
+            return JsonResponse({"error": "ZachowaniePunkty not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, pk=None):
+        if not pk:
+            return JsonResponse({"error": "Method DELETE requires a pk"}, status=400)
+        try:
+            zp = ZachowaniePunkty.objects.get(pk=pk)
+            zp.delete()
+            return JsonResponse({"message": "ZachowaniePunkty deleted"}, status=204)
+        except ZachowaniePunkty.DoesNotExist:
+            return JsonResponse({"error": "ZachowaniePunkty not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

@@ -1,5 +1,11 @@
 from django.urls import path
-from .views import OcenaApiView, OcenaOkresowaApiView, OcenaKoncowaApiView
+from .views import (
+    OcenaApiView,
+    OcenaOkresowaApiView,
+    OcenaKoncowaApiView,
+    # zachowanie
+    ZachowaniePunktyApiView,
+)
 
 urlpatterns = [
     path("oceny/", OcenaApiView.as_view(), name="ocena-list"),
@@ -10,4 +16,7 @@ urlpatterns = [
     
     path("oceny-koncowe/", OcenaKoncowaApiView.as_view(), name="ocena-koncowa-list"),
     path("oceny-koncowe/<int:pk>/", OcenaKoncowaApiView.as_view(), name="ocena-koncowa-detail"),
+    
+    path("zachowanie-punkty/", ZachowaniePunktyApiView.as_view(), name="zachowaniepunkty-list"),
+    path("zachowanie-punkty/<int:pk>/", ZachowaniePunktyApiView.as_view(), name="zachowaniepunkty-detail"),
 ]

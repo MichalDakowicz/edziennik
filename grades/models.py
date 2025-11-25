@@ -3,6 +3,10 @@ from django.db import models
 from users.models import Nauczyciel, Uczen
 
 # Create your models here.
+
+
+class ActiveSourceManager(models.Manager):
+    pass
 class Ocena(models.Model):
     wartosc = models.DecimalField(max_digits=3, decimal_places=2)
     waga = models.PositiveSmallIntegerField(default=1)
@@ -61,4 +65,26 @@ class OcenaKoncowa(models.Model):
 
     def __str__(self):
         return f"{self.uczen} - (przedmiot): {self.wartosc}" # TODO: dodać przedmiot
+
+class ZachowaniePunkty(models.Model):
+    uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='punkty_zachowania')
+    punkty = models.IntegerField()
+    opis = models.TextField(blank=True, null=True)
+    data_wpisu = models.DateTimeField(auto_now_add=True)
+    nauczyciel_wpisujacy = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True,
+                                             related_name='wpisane_punkty_zachowania')
+   
+
+    objects = models.Manager()
+    
+    active = ActiveSourceManager()
+
+    def __str__(self):
+        znak = "+" if self.punkty > 0 else ""
+        return f"{self.uczen} - {znak}{self.punkty} pkt ({self.data_wpisu.strftime('%Y-%m-%d')})"
+
+    class Meta:
+        verbose_name = "Punkt z zachowania"
+        verbose_name_plural = "Punkty z zachowania"
+        ordering = ['-data_wpisu']
 

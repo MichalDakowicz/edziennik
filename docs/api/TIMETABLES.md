@@ -196,3 +196,49 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    curl.exe -X DELETE http://127.0.0.1:8000/api/plany-zajec/1/ `
    -H "ADMIN-KEY: "
 ```
+
+## `Wydarzenia`
+
+-   GET (lista wydarzeń)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/wydarzenia/" `
+   -H "ADMIN-KEY: "
+```
+
+-   GET (lista wydarzeń dla klasy / nauczyciela / przedmiotu — filtry `klasa_id`, `nauczyciel_id`, `przedmiot_id`)
+
+```ps
+   curl.exe -X GET "http://127.0.0.1:8000/api/wydarzenia/?klasa_id=1&nauczyciel_id=5" `
+   -H "ADMIN-KEY: "
+```
+
+-   GET (pojedyncze wydarzenie)
+
+```ps
+   curl.exe -X GET http://127.0.0.1:8000/api/wydarzenia/1/ `
+   -H "ADMIN-KEY: "
+```
+
+-   POST (utworzenie wydarzenia)
+
+```ps
+   curl.exe -X POST http://127.0.0.1:8000/api/wydarzenia/ `  -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"tytul": "Wycieczka", "opis": "Wyjazd edukacyjny", "data": "2025-12-01T09:00:00Z", "klasa_id": 2, "nauczyciel_id": 5}'
+```
+
+-   PUT (aktualizacja wydarzenia)
+
+```ps
+   curl.exe -X PUT http://127.0.0.1:8000/api/wydarzenia/1/ `  -H "ADMIN-KEY: " `
+   -H "Content-Type: application/json" `
+   -d '{"tytul": "Zaktualizowany tytuł", "data": "2025-12-02T10:00:00Z"}'
+```
+
+-   DELETE (usunięcie wydarzenia)
+
+```ps
+   curl.exe -X DELETE http://127.0.0.1:8000/api/wydarzenia/1/ `
+   -H "ADMIN-KEY: "
+```
