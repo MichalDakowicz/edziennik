@@ -5,14 +5,14 @@
 -   GET (lista ocen)
 
 ```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/" `   -H "ADMIN-KEY: OcYEWYixIWioQsk2Idl1Zgw8jpxgOYYe"
+   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/" `   -H "ADMIN-KEY: "
 ```
 
 -   GET (lista ocen dla konkretnego użytkownika)
 
 ```ps
    curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/?user_id=1" `
-   -H "ADMIN-KEY: OcYEWYixIWioQsk2Idl1Zgw8jpxgOYYe"
+   -H "ADMIN-KEY: "
 ```
 
 -   GET (pojedyncza ocena)
