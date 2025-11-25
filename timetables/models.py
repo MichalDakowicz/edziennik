@@ -2,9 +2,11 @@ from django.db import models
 
 from users.models import Nauczyciel, Uczen
 
+from utils.models import Przedmiot, Klasa
+
 # Create your models here.
 class PlanyZajec(models.Model):
-    # klasa = models.ForeignKey(Klasa, on_delete=models.CASCADE, related_name='plany_zajec') # TODO: dodać klasę
+    klasa = models.ForeignKey(Klasa, on_delete=models.CASCADE, related_name='plany_zajec')
     ObowiazujeOdDnia = models.DateField()
     wpisy = models.ManyToManyField('PlanWpis', related_name='plany_zajec', blank=True)
     class Meta:
@@ -40,7 +42,7 @@ class DniTygodnia(models.Model):
 
 class Zajecia(models.Model):
     
-    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='zajecia_przedmiotu') # TODO: dodać przedmiot
+    przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='zajecia_przedmiotu') 
     nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, related_name='zajecia_nauczyciela', null=True,blank=True,
     )
 

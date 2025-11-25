@@ -23,7 +23,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"Numer": 1, "CzasOd": "08:00", "CzasDo": "08:45", "CzasTrwania": "00:45:00"}'
+   -d '{\"Numer\": 1, \"CzasOd\": \"08:00\", \"CzasDo\": \"08:45\", \"CzasTrwania\": \"00:45:00\"}'
 ```
 
 -   PUT (aktualizacja godziny lekcyjnej)
@@ -31,7 +31,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"Numer": 2, "CzasOd": "08:15", "CzasDo": "09:00", "CzasTrwania": "00:45:00"}'
+   -d '{\"Numer\": 2, \"CzasOd\": \"08:15\", \"CzasDo\": \"09:00\", \"CzasTrwania\": \"00:45:00\"}'
 ```
 
 -   DELETE (usunięcie godziny lekcyjnej)
@@ -62,7 +62,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"Nazwa": "Poniedziałek", "Numer": 1}'
+   -d '{\"Nazwa\": \"Poniedziałek\", \"Numer\": 1}'
 ```
 
 -   PUT (aktualizacja dnia tygodnia)
@@ -70,7 +70,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"Nazwa": "Poniedziałek", "Numer": 1}'
+   -d '{\"Nazwa\": \"Poniedziałek\", \"Numer\": 1}'
 ```
 
 -   DELETE (usunięcie dnia tygodnia)
@@ -101,7 +101,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"nauczyciel_id": 5}'
+   -d '{\"nauczyciel_id\": 5}'
 ```
 
 -   PUT (aktualizacja zajęć)
@@ -109,7 +109,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"nauczyciel_id": 6}'
+   -d '{\"nauczyciel_id\": 6}'
 ```
 
 -   DELETE (usunięcie zajęć)
@@ -140,7 +140,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"godzina_lekcyjna_id": 1, "dzien_tygodnia_id": 1, "zajecia_id": 3}'
+   -d '{\"godzina_lekcyjna_id\": 1, \"dzien_tygodnia_id\": 1, \"zajecia_id\": 3}'
 ```
 
 -   PUT (aktualizacja wpisu)
@@ -148,7 +148,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"godzina_lekcyjna_id": 2, "dzien_tygodnia_id": 1, "zajecia_id": 4}'
+   -d '{\"godzina_lekcyjna_id\": 2, \"dzien_tygodnia_id\": 1, \"zajecia_id\": 4}'
 ```
 
 -   DELETE (usunięcie wpisu)
@@ -179,7 +179,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"ObowiazujeOdDnia": "2025-09-01", "wpisy": [1,2,3]}'
+   -d '{\"ObowiazujeOdDnia\": \"2025-09-01\", \"wpisy\": [1,2,3]}'
 ```
 
 -   PUT (aktualizacja planu)
@@ -187,7 +187,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"ObowiazujeOdDnia": "2025-09-15", "wpisy": [2,4]}'
+   -d '{\"ObowiazujeOdDnia\": \"2025-09-15\", \"wpisy\": [2,4]}'
 ```
 
 -   DELETE (usunięcie planu)
@@ -225,7 +225,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"tytul": "Wycieczka", "opis": "Wyjazd edukacyjny", "data": "2025-12-01T09:00:00Z", "klasa_id": 2, "nauczyciel_id": 5}'
+   -d '{\"tytul\": \"Wycieczka\", \"opis\": \"Wyjazd edukacyjny\", \"data\": \"2025-12-01T09:00:00Z\", \"klasa_id\": 2, \"nauczyciel_id\": 5}'
 ```
 
 -   PUT (aktualizacja wydarzenia)
@@ -233,7 +233,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"tytul": "Zaktualizowany tytuł", "data": "2025-12-02T10:00:00Z"}'
+   -d '{\"tytul\": \"Zaktualizowany tytuł\", \"data\": \"2025-12-02T10:00:00Z\"}'
 ```
 
 -   DELETE (usunięcie wydarzenia)

@@ -26,9 +26,9 @@
 -   POST (utworzenie oceny)
 
 ```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/ `  -H "ADMIN-KEY: " `
+   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/ ` -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 5, "data": "2025-11-20", "uczen_id": 1, "przedmiot": "Matematyka"}'
+   -d '{\"wartosc\": 5, \"data\": \"2025-11-20\", \"uczen_id\": 1, \"przedmiot\": \"Matematyka\"}'
 ```
 
 -   PUT (aktualizacja oceny)
@@ -36,7 +36,7 @@
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 4, "data": "2025-11-21", "uczen_id": 1, "przedmiot": "Matematyka"}'
+   -d '{\"wartosc\": 4, \"data\": \"2025-11-21\", \"uczen_id\": 1, \"przedmiot\": \"Matematyka\"}'
 ```
 
 -   DELETE (usunięcie oceny)
@@ -74,7 +74,7 @@
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 4, "okres": "I", "uczen_id": 1, "przedmiot": "Fizyka"}'
+   -d '{\"wartosc\": 4, \"okres\": \"I\", \"uczen_id\": 1, \"przedmiot\": \"Fizyka\"}'
 ```
 
 -   PUT (aktualizacja oceny okresowej)
@@ -82,7 +82,7 @@
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 5, "okres": "II", "uczen_id": 1, "przedmiot": "Fizyka"}'
+   -d '{\"wartosc\": 5, \"okres\": \"II\", \"uczen_id\": 1, \"przedmiot\": \"Fizyka\"}'
 ```
 
 -   DELETE (usunięcie oceny okresowej)
@@ -120,7 +120,7 @@
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 5, "rok_szkolny": "2024/2025", "uczen_id": 1, "przedmiot": "Historia"}'
+   -d '{\"wartosc\": 5, \"rok_szkolny\": \"2024/2025\", \"uczen_id\": 1, \"przedmiot\": \"Historia\"}'
 ```
 
 -   PUT (aktualizacja oceny końcowej)
@@ -128,7 +128,7 @@
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"wartosc": 4, "rok_szkolny": "2024/2025", "uczen_id": 1, "przedmiot": "Historia"}'
+   -d '{\"wartosc\": 4, \"rok_szkolny\": \"2024/2025\", \"uczen_id\": 1, \"przedmiot\": \"Historia\"}'
 ```
 
 -   DELETE (usunięcie oceny końcowej)
@@ -166,7 +166,7 @@
 ```ps
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"uczen_id": 1, "punkty": 2, "opis": "Dodatkowe za pomoc", "nauczyciel_wpisujacy_id": 5}'
+   -d '{\"uczen_id\": 1, \"punkty\": 2, \"opis\": \"Dodatkowe za pomoc\", \"nauczyciel_wpisujacy_id\": 5}'
 ```
 
 -   PUT (aktualizacja wpisu)
@@ -174,7 +174,7 @@
 ```ps
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/1/ `  -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"punkty": -1, "opis": "Korekta"}'
+   -d '{\"punkty\": -1, \"opis\": \"Korekta\"}'
 ```
 
 -   DELETE (usuń wpis)

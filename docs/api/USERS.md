@@ -22,7 +22,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/uczniowie/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"username": "jan_kowalski", "password": "securepass123", "email": "jan.kowalski@example.com", "first_name": "Jan", "last_name": "Kowalski", "telefon": "123456789", "data_urodzenia": "2010-01-01"}'
+   -d '{\"username\": \"jan_kowalski\", \"password\": \"securepass123\", \"email\": \"jan.kowalski@example.com\", \"first_name\": \"Jan\", \"last_name\": \"Kowalski\", \"telefon\": \"123456789\", \"data_urodzenia\": \"2010-01-01\"}'
 ```
 
 -   DELETE (usunięcie ucznia)
@@ -38,7 +38,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/uczniowie/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"email": "jan.nowak@example.com", "first_name": "Jan", "last_name": "Nowak", "telefon": "987654321", "data_urodzenia": "2010-01-01"}'
+   -d '{\"email\": \"jan.nowak@example.com\", \"first_name\": \"Jan\", \"last_name\": \"Nowak\", \"telefon\": \"987654321\", \"data_urodzenia\": \"2010-01-01\"}'
 ```
 
 ## `Nauczyciele`
@@ -63,7 +63,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/nauczyciele/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"username": "anna_nowak", "password": "securepass123", "email": "anna.nowak@example.com", "first_name": "Anna", "last_name": "Nowak", "telefon": "123456789"}'
+   -d '{\"username\": \"anna_nowak\", \"password\": \"securepass123\", \"email\": \"anna.nowak@example.com\", \"first_name\": \"Anna\", \"last_name\": \"Nowak\", \"telefon\": \"123456789\"}'
 ```
 
 -   PUT (aktualizacja nauczyciela)
@@ -72,7 +72,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/nauczyciele/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"email": "anna.kowalska@example.com", "first_name": "Anna", "last_name": "Kowalska", "telefon": "987654321"}'
+   -d '{\"email\": \"anna.kowalska@example.com\", \"first_name\": \"Anna\", \"last_name\": \"Kowalska\", \"telefon\": \"987654321\"}'
 ```
 
 -   DELETE (usunięcie nauczyciela)
@@ -104,7 +104,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/rodzice/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"username": "piotr_kowalski", "password": "securepass123", "email": "piotr.kowalski@example.com", "first_name": "Piotr", "last_name": "Kowalski", "telefon": "123456789"}'
+   -d '{\"username\": \"piotr_kowalski\", \"password\": \"securepass123\", \"email\": \"piotr.kowalski@example.com\", \"first_name\": \"Piotr\", \"last_name\": \"Kowalski\", \"telefon\": \"123456789\"}'
 ```
 
 -   PUT (aktualizacja rodzica)
@@ -113,7 +113,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/rodzice/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"email": "piotr.nowak@example.com", "first_name": "Piotr", "last_name": "Nowak", "telefon": "987654321"}'
+   -d '{\"email\": \"piotr.nowak@example.com\", \"first_name\": \"Piotr\", \"last_name\": \"Nowak\", \"telefon\": \"987654321\"}'
 ```
 
 -   DELETE (usunięcie rodzica)
@@ -145,7 +145,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/userprofiles/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"user_id": 1, "theme_preference": "dark"}'
+   -d '{\"user_id\": 1, \"theme_preference\": \"dark\"}'
 ```
 
 -   PUT (aktualizacja profilu)
@@ -154,7 +154,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/userprofiles/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"theme_preference": "light"}'
+   -d '{\"theme_preference\": \"light\"}'
 ```
 
 -   DELETE (usunięcie profilu)
@@ -193,7 +193,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/wiadomosci/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"nadawca_id": 1, "odbiorca_id": 2, "temat": "Przykład", "tresc": "Treść wiadomości"}'
+   -d '{\"nadawca_id\": 1, \"odbiorca_id\": 2, \"temat\": \"Przykład\", \"tresc\": \"Treść wiadomości\"}'
 ```
 
 -   PUT (aktualizacja wiadomości — np. oznaczenie jako przeczytana)
@@ -202,7 +202,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/wiadomosci/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"przeczytana": true}'
+   -d '{\"przeczytana\": true}'
 ```
 
 -   DELETE (usunięcie wiadomości)
@@ -234,7 +234,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/klasy/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"nazwa": "A", "numer": 1, "wychowawca_id": 5}'
+   -d '{\"nazwa\": \"A\", \"numer\": 1, \"wychowawca_id\": 5}'
 ```
 
 -   PUT (aktualizacja klasy)
@@ -243,7 +243,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/klasy/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"nazwa": "B", "numer": 2, "wychowawca_id": 6}'
+   -d '{\"nazwa\": \"B\", \"numer\": 2, \"wychowawca_id\": 6}'
 ```
 
 -   DELETE (usunięcie klasy)
@@ -275,7 +275,7 @@
    curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/adresy/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"ulica": "Szkolna", "numer_domu": "12", "miasto": "Warszawa", "kod_pocztowy": "00-001" }'
+   -d '{\"ulica\": \"Szkolna\", \"numer_domu\": \"12\", \"miasto\": \"Warszawa\", \"kod_pocztowy\": \"00-001\" }'
 ```
 
 -   PUT (aktualizacja adresu)
@@ -284,7 +284,7 @@
    curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/adresy/1/ `
    -H "ADMIN-KEY: " `
    -H "Content-Type: application/json" `
-   -d '{"miasto": "Kraków"}'
+   -d '{\"miasto\": \"Kraków\"}'
 ```
 
 -   DELETE (usunięcie adresu)

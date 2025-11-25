@@ -2,6 +2,8 @@ from django.db import models
 
 from users.models import Nauczyciel, Uczen
 
+from utils.models import Przedmiot
+
 # Create your models here.
 
 
@@ -21,7 +23,7 @@ class Ocena(models.Model):
     uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='oceny')
     nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, related_name='wystawione_oceny')
     
-    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny')
+    przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny')
     
     def __str__(self):
         return f"{self.wartosc} - {self.uczen} ({self.przedmiot})"
@@ -55,7 +57,7 @@ class OcenaKoncowa(models.Model):
     
     wartosc = models.DecimalField(max_digits=3, decimal_places=2) 
     
-    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_koncowe')
+    przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_koncowe')
     
     nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -64,7 +66,7 @@ class OcenaKoncowa(models.Model):
         verbose_name_plural = "Oceny końcowe"
 
     def __str__(self):
-        return f"{self.uczen} - (przedmiot): {self.wartosc}" # TODO: dodać przedmiot
+        return f"{self.uczen} - ({self.przedmiot}): {self.wartosc}"
 
 class ZachowaniePunkty(models.Model):
     uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='punkty_zachowania')
