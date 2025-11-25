@@ -1,10 +1,11 @@
 # `grades` - Endpointy API dla zarządzania ocenami.
 
 ## `Oceny`
+
 -   GET (lista ocen)
 
 ```ps
-   curl.exe -X GET "http://127.0.0.1:8000/api/oceny/" `
+   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/" `
    -H "ADMIN-KEY: "
 ```
 
@@ -46,6 +47,7 @@
 ```
 
 ## `Oceny okresowe`
+
 -   GET (lista ocen okresowych)
 
 ```ps
@@ -91,6 +93,7 @@
 ```
 
 ## `Oceny końcowe`
+
 -   GET (lista ocen końcowych)
 
 ```ps

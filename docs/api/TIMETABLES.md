@@ -3,21 +3,22 @@
 Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć. Wzorzec requestów i nagłówków zgodny z innymi dokumentacjami API (zob. `USERS.md`, `GRADES.md`). Wszystkie żądania wymagają nagłówka `ADMIN-KEY`.
 
 ## `Godziny Lekcyjne`
-- GET (lista godzin lekcyjnych)
+
+-   GET (lista godzin lekcyjnych)
 
 ```ps
    curl.exe -X GET "http://127.0.0.1:8000/api/godziny-lekcyjne/" `
    -H "ADMIN-KEY: "
 ```
 
-- GET (pojedyncza godzina lekcyjna)
+-   GET (pojedyncza godzina lekcyjna)
 
 ```ps
    curl.exe -X GET http://127.0.0.1:8000/api/godziny-lekcyjne/1/ `
    -H "ADMIN-KEY: "
 ```
 
-- POST (utworzenie godziny lekcyjnej)
+-   POST (utworzenie godziny lekcyjnej)
 
 ```ps
    curl.exe -X POST http://127.0.0.1:8000/api/godziny-lekcyjne/ `  -H "ADMIN-KEY: " `
@@ -25,7 +26,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"Numer": 1, "CzasOd": "08:00", "CzasDo": "08:45", "CzasTrwania": "00:45:00"}'
 ```
 
-- PUT (aktualizacja godziny lekcyjnej)
+-   PUT (aktualizacja godziny lekcyjnej)
 
 ```ps
    curl.exe -X PUT http://127.0.0.1:8000/api/godziny-lekcyjne/1/ `  -H "ADMIN-KEY: " `
@@ -33,7 +34,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"Numer": 2, "CzasOd": "08:15", "CzasDo": "09:00", "CzasTrwania": "00:45:00"}'
 ```
 
-- DELETE (usunięcie godziny lekcyjnej)
+-   DELETE (usunięcie godziny lekcyjnej)
 
 ```ps
    curl.exe -X DELETE http://127.0.0.1:8000/api/godziny-lekcyjne/1/ `
@@ -41,21 +42,22 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```
 
 ## `Dni Tygodnia`
-- GET (lista dni tygodnia)
+
+-   GET (lista dni tygodnia)
 
 ```ps
    curl.exe -X GET "http://127.0.0.1:8000/api/dni-tygodnia/" `
    -H "ADMIN-KEY: "
 ```
 
-- GET (pojedynczy dzień)
+-   GET (pojedynczy dzień)
 
 ```ps
    curl.exe -X GET http://127.0.0.1:8000/api/dni-tygodnia/1/ `
    -H "ADMIN-KEY: "
 ```
 
-- POST (utworzenie dnia tygodnia)
+-   POST (utworzenie dnia tygodnia)
 
 ```ps
    curl.exe -X POST http://127.0.0.1:8000/api/dni-tygodnia/ `  -H "ADMIN-KEY: " `
@@ -63,7 +65,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"Nazwa": "Poniedziałek", "Numer": 1}'
 ```
 
-- PUT (aktualizacja dnia tygodnia)
+-   PUT (aktualizacja dnia tygodnia)
 
 ```ps
    curl.exe -X PUT http://127.0.0.1:8000/api/dni-tygodnia/1/ `  -H "ADMIN-KEY: " `
@@ -71,7 +73,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"Nazwa": "Poniedziałek", "Numer": 1}'
 ```
 
-- DELETE (usunięcie dnia tygodnia)
+-   DELETE (usunięcie dnia tygodnia)
 
 ```ps
    curl.exe -X DELETE http://127.0.0.1:8000/api/dni-tygodnia/1/ `
@@ -79,21 +81,22 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```
 
 ## `Zajęcia`
-- GET (lista zajęć)
+
+-   GET (lista zajęć)
 
 ```ps
    curl.exe -X GET "http://127.0.0.1:8000/api/zajecia/" `
    -H "ADMIN-KEY: "
 ```
 
-- GET (pojedyncze zajęcia)
+-   GET (pojedyncze zajęcia)
 
 ```ps
    curl.exe -X GET http://127.0.0.1:8000/api/zajecia/1/ `
    -H "ADMIN-KEY: "
 ```
 
-- POST (utworzenie zajęć)
+-   POST (utworzenie zajęć)
 
 ```ps
    curl.exe -X POST http://127.0.0.1:8000/api/zajecia/ `  -H "ADMIN-KEY: " `
@@ -101,7 +104,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"nauczyciel_id": 5}'
 ```
 
-- PUT (aktualizacja zajęć)
+-   PUT (aktualizacja zajęć)
 
 ```ps
    curl.exe -X PUT http://127.0.0.1:8000/api/zajecia/1/ `  -H "ADMIN-KEY: " `
@@ -109,7 +112,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"nauczyciel_id": 6}'
 ```
 
-- DELETE (usunięcie zajęć)
+-   DELETE (usunięcie zajęć)
 
 ```ps
    curl.exe -X DELETE http://127.0.0.1:8000/api/zajecia/1/ `
@@ -117,21 +120,22 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```
 
 ## `Plan Wpisy` (pozycje w planie)
-- GET (lista wpisów)
+
+-   GET (lista wpisów)
 
 ```ps
    curl.exe -X GET "http://127.0.0.1:8000/api/plan-wpisy/" `
    -H "ADMIN-KEY: "
 ```
 
-- GET (pojedynczy wpis)
+-   GET (pojedynczy wpis)
 
 ```ps
    curl.exe -X GET http://127.0.0.1:8000/api/plan-wpisy/1/ `
    -H "ADMIN-KEY: "
 ```
 
-- POST (utworzenie wpisu w planie)
+-   POST (utworzenie wpisu w planie)
 
 ```ps
    curl.exe -X POST http://127.0.0.1:8000/api/plan-wpisy/ `  -H "ADMIN-KEY: " `
@@ -139,7 +143,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"godzina_lekcyjna_id": 1, "dzien_tygodnia_id": 1, "zajecia_id": 3}'
 ```
 
-- PUT (aktualizacja wpisu)
+-   PUT (aktualizacja wpisu)
 
 ```ps
    curl.exe -X PUT http://127.0.0.1:8000/api/plan-wpisy/1/ `  -H "ADMIN-KEY: " `
@@ -147,7 +151,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"godzina_lekcyjna_id": 2, "dzien_tygodnia_id": 1, "zajecia_id": 4}'
 ```
 
-- DELETE (usunięcie wpisu)
+-   DELETE (usunięcie wpisu)
 
 ```ps
    curl.exe -X DELETE http://127.0.0.1:8000/api/plan-wpisy/1/ `
@@ -155,21 +159,22 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
 ```
 
 ## `Plany Zajęć`
-- GET (lista planów zajęć)
+
+-   GET (lista planów zajęć)
 
 ```ps
    curl.exe -X GET "http://127.0.0.1:8000/api/plany-zajec/" `
    -H "ADMIN-KEY: "
 ```
 
-- GET (pojedynczy plan)
+-   GET (pojedynczy plan)
 
 ```ps
    curl.exe -X GET http://127.0.0.1:8000/api/plany-zajec/1/ `
    -H "ADMIN-KEY: "
 ```
 
-- POST (utworzenie planu)
+-   POST (utworzenie planu)
 
 ```ps
    curl.exe -X POST http://127.0.0.1:8000/api/plany-zajec/ `  -H "ADMIN-KEY: " `
@@ -177,7 +182,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"ObowiazujeOdDnia": "2025-09-01", "wpisy": [1,2,3]}'
 ```
 
-- PUT (aktualizacja planu)
+-   PUT (aktualizacja planu)
 
 ```ps
    curl.exe -X PUT http://127.0.0.1:8000/api/plany-zajec/1/ `  -H "ADMIN-KEY: " `
@@ -185,7 +190,7 @@ Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć.
    -d '{"ObowiazujeOdDnia": "2025-09-15", "wpisy": [2,4]}'
 ```
 
-- DELETE (usunięcie planu)
+-   DELETE (usunięcie planu)
 
 ```ps
    curl.exe -X DELETE http://127.0.0.1:8000/api/plany-zajec/1/ `
