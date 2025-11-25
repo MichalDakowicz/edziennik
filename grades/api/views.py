@@ -16,10 +16,14 @@ class OcenaApiView(View):
                 ocena = Ocena.objects.get(pk=pk)
                 data = {
                     "id": ocena.id,
-                    "wartosc": ocena.wartosc,
-                    "data": ocena.data,
+                    "wartosc": str(ocena.wartosc),
+                    "data": (
+                        str(ocena.data_wystawienia)
+                        if getattr(ocena, "data_wystawienia", None) is not None
+                        else None
+                    ),
                     "uczen_id": ocena.uczen.id,
-                    "przedmiot": ocena.przedmiot,
+                    "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 }
                 return JsonResponse(data)
             except Ocena.DoesNotExist:
@@ -37,10 +41,14 @@ class OcenaApiView(View):
                 data.append(
                     {
                         "id": ocena.id,
-                        "wartosc": ocena.wartosc,
-                        "data": ocena.data,
+                        "wartosc": str(ocena.wartosc),
+                        "data": (
+                            str(ocena.data_wystawienia)
+                            if getattr(ocena, "data_wystawienia", None) is not None
+                            else None
+                        ),
                         "uczen_id": ocena.uczen.id,
-                        "przedmiot": ocena.przedmiot,
+                        "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                     }
                 )
             return JsonResponse(data, safe=False)
@@ -48,22 +56,26 @@ class OcenaApiView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if not all(k in data for k in ("wartosc", "data", "uczen_id", "przedmiot")):
+            if not all(k in data for k in ("wartosc", "uczen_id", "przedmiot_id")):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             ocena = Ocena.objects.create(
                 wartosc=data["wartosc"],
-                data=data["data"],
                 uczen_id=data["uczen_id"],
-                przedmiot=data["przedmiot"],
+                przedmiot_id=data["przedmiot_id"],
+                data_wystawienia=data.get("data"),
             )
             return JsonResponse(
                 {
                     "id": ocena.id,
-                    "wartosc": ocena.wartosc,
-                    "data": ocena.data,
+                    "wartosc": str(ocena.wartosc),
+                    "data": (
+                        str(ocena.data_wystawienia)
+                        if getattr(ocena, "data_wystawienia", None) is not None
+                        else None
+                    ),
                     "uczen_id": ocena.uczen.id,
-                    "przedmiot": ocena.przedmiot,
+                    "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 },
                 status=201,
             )
@@ -76,18 +88,27 @@ class OcenaApiView(View):
             data = json.loads(request.body)
 
             ocena.wartosc = data.get("wartosc", ocena.wartosc)
-            ocena.data = data.get("data", ocena.data)
+            # map incoming 'data' to model's 'data_wystawienia'
+            if "data" in data:
+                ocena.data_wystawienia = data["data"]
             ocena.uczen_id = data.get("uczen_id", ocena.uczen.id)
-            ocena.przedmiot = data.get("przedmiot", ocena.przedmiot)
+            if "przedmiot_id" in data:
+                ocena.przedmiot_id = data.get(
+                    "przedmiot_id", getattr(ocena, "przedmiot_id", None)
+                )
             ocena.save()
 
             return JsonResponse(
                 {
                     "id": ocena.id,
-                    "wartosc": ocena.wartosc,
-                    "data": ocena.data,
+                    "wartosc": str(ocena.wartosc),
+                    "data": (
+                        str(ocena.data_wystawienia)
+                        if getattr(ocena, "data_wystawienia", None) is not None
+                        else None
+                    ),
                     "uczen_id": ocena.uczen.id,
-                    "przedmiot": ocena.przedmiot,
+                    "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 }
             )
         except Ocena.DoesNotExist:
@@ -113,10 +134,10 @@ class OcenaOkresowaApiView(View):
                 ocena_okresowa = OcenaOkresowa.objects.get(pk=pk)
                 data = {
                     "id": ocena_okresowa.id,
-                    "wartosc": ocena_okresowa.wartosc,
+                    "wartosc": str(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
                     "uczen_id": ocena_okresowa.uczen.id,
-                    "przedmiot": ocena_okresowa.przedmiot,
+                    "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 }
                 return JsonResponse(data)
             except OcenaOkresowa.DoesNotExist:
@@ -134,10 +155,10 @@ class OcenaOkresowaApiView(View):
                 data.append(
                     {
                         "id": ocena_okresowa.id,
-                        "wartosc": ocena_okresowa.wartosc,
+                        "wartosc": str(ocena_okresowa.wartosc),
                         "okres": ocena_okresowa.okres,
                         "uczen_id": ocena_okresowa.uczen.id,
-                        "przedmiot": ocena_okresowa.przedmiot,
+                        "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                     }
                 )
             return JsonResponse(data, safe=False)
@@ -145,24 +166,22 @@ class OcenaOkresowaApiView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if not all(
-                k in data for k in ("wartosc", "okres", "uczen_id", "przedmiot")
-            ):
+            if not all(k in data for k in ("wartosc", "okres", "uczen_id")):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             ocena_okresowa = OcenaOkresowa.objects.create(
                 wartosc=data["wartosc"],
                 okres=data["okres"],
                 uczen_id=data["uczen_id"],
-                przedmiot=data["przedmiot"],
+                nauczyciel_id=data.get("nauczyciel_id"),
             )
             return JsonResponse(
                 {
                     "id": ocena_okresowa.id,
-                    "wartosc": ocena_okresowa.wartosc,
+                    "wartosc": str(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
                     "uczen_id": ocena_okresowa.uczen.id,
-                    "przedmiot": ocena_okresowa.przedmiot,
+                    "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 },
                 status=201,
             )
@@ -177,16 +196,17 @@ class OcenaOkresowaApiView(View):
             ocena_okresowa.wartosc = data.get("wartosc", ocena_okresowa.wartosc)
             ocena_okresowa.okres = data.get("okres", ocena_okresowa.okres)
             ocena_okresowa.uczen_id = data.get("uczen_id", ocena_okresowa.uczen.id)
-            ocena_okresowa.przedmiot = data.get("przedmiot", ocena_okresowa.przedmiot)
+            if "nauczyciel_id" in data:
+                ocena_okresowa.nauczyciel_id = data.get("nauczyciel_id")
             ocena_okresowa.save()
 
             return JsonResponse(
                 {
                     "id": ocena_okresowa.id,
-                    "wartosc": ocena_okresowa.wartosc,
+                    "wartosc": str(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
                     "uczen_id": ocena_okresowa.uczen.id,
-                    "przedmiot": ocena_okresowa.przedmiot,
+                    "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 }
             )
         except OcenaOkresowa.DoesNotExist:
@@ -212,10 +232,10 @@ class OcenaKoncowaApiView(View):
                 ocena_koncowa = OcenaKoncowa.objects.get(pk=pk)
                 data = {
                     "id": ocena_koncowa.id,
-                    "wartosc": ocena_koncowa.wartosc,
-                    "rok_szkolny": ocena_koncowa.rok_szkolny,
+                    "wartosc": str(ocena_koncowa.wartosc),
                     "uczen_id": ocena_koncowa.uczen.id,
-                    "przedmiot": ocena_koncowa.przedmiot,
+                    "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
+                    "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 }
                 return JsonResponse(data)
             except OcenaKoncowa.DoesNotExist:
@@ -233,10 +253,10 @@ class OcenaKoncowaApiView(View):
                 data.append(
                     {
                         "id": ocena_koncowa.id,
-                        "wartosc": ocena_koncowa.wartosc,
-                        "rok_szkolny": ocena_koncowa.rok_szkolny,
+                        "wartosc": str(ocena_koncowa.wartosc),
                         "uczen_id": ocena_koncowa.uczen.id,
-                        "przedmiot": ocena_koncowa.przedmiot,
+                        "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
+                        "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                     }
                 )
             return JsonResponse(data, safe=False)
@@ -244,24 +264,21 @@ class OcenaKoncowaApiView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if not all(
-                k in data for k in ("wartosc", "rok_szkolny", "uczen_id", "przedmiot")
-            ):
+            if not all(k in data for k in ("wartosc", "uczen_id", "przedmiot_id")):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             ocena_koncowa = OcenaKoncowa.objects.create(
                 wartosc=data["wartosc"],
-                rok_szkolny=data["rok_szkolny"],
                 uczen_id=data["uczen_id"],
-                przedmiot=data["przedmiot"],
+                przedmiot_id=data["przedmiot_id"],
             )
             return JsonResponse(
                 {
                     "id": ocena_koncowa.id,
-                    "wartosc": ocena_koncowa.wartosc,
-                    "rok_szkolny": ocena_koncowa.rok_szkolny,
+                    "wartosc": str(ocena_koncowa.wartosc),
                     "uczen_id": ocena_koncowa.uczen.id,
-                    "przedmiot": ocena_koncowa.przedmiot,
+                    "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
+                    "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 },
                 status=201,
             )
@@ -274,20 +291,20 @@ class OcenaKoncowaApiView(View):
             data = json.loads(request.body)
 
             ocena_koncowa.wartosc = data.get("wartosc", ocena_koncowa.wartosc)
-            ocena_koncowa.rok_szkolny = data.get(
-                "rok_szkolny", ocena_koncowa.rok_szkolny
-            )
             ocena_koncowa.uczen_id = data.get("uczen_id", ocena_koncowa.uczen.id)
-            ocena_koncowa.przedmiot = data.get("przedmiot", ocena_koncowa.przedmiot)
+            if "przedmiot_id" in data:
+                ocena_koncowa.przedmiot_id = data.get("przedmiot_id")
+            if "nauczyciel_id" in data:
+                ocena_koncowa.nauczyciel_id = data.get("nauczyciel_id")
             ocena_koncowa.save()
 
             return JsonResponse(
                 {
                     "id": ocena_koncowa.id,
-                    "wartosc": ocena_koncowa.wartosc,
-                    "rok_szkolny": ocena_koncowa.rok_szkolny,
+                    "wartosc": str(ocena_koncowa.wartosc),
                     "uczen_id": ocena_koncowa.uczen.id,
-                    "przedmiot": ocena_koncowa.przedmiot,
+                    "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
+                    "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 }
             )
         except OcenaKoncowa.DoesNotExist:
@@ -304,7 +321,6 @@ class OcenaKoncowaApiView(View):
             return JsonResponse({"error": "OcenaKoncowa not found"}, status=404)
 
 
-
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(admin_key_required, name="dispatch")
 class ZachowaniePunktyApiView(View):
@@ -318,7 +334,9 @@ class ZachowaniePunktyApiView(View):
                     "punkty": zp.punkty,
                     "opis": zp.opis,
                     "data_wpisu": zp.data_wpisu,
-                    "nauczyciel_wpisujacy_id": zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None,
+                    "nauczyciel_wpisujacy_id": (
+                        zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None
+                    ),
                 }
                 return JsonResponse(data)
             except ZachowaniePunkty.DoesNotExist:
@@ -336,8 +354,16 @@ class ZachowaniePunktyApiView(View):
                         "uczen_id": zp.uczen.id,
                         "punkty": zp.punkty,
                         "opis": zp.opis,
-                        "data_wpisu": zp.data_wpisu,
-                        "nauczyciel_wpisujacy_id": zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None,
+                        "data_wpisu": (
+                            str(zp.data_wpisu)
+                            if getattr(zp, "data_wpisu", None) is not None
+                            else None
+                        ),
+                        "nauczyciel_wpisujacy_id": (
+                            zp.nauczyciel_wpisujacy.id
+                            if zp.nauczyciel_wpisujacy
+                            else None
+                        ),
                     }
                 )
             return JsonResponse(data, safe=False)
@@ -354,7 +380,9 @@ class ZachowaniePunktyApiView(View):
                 opis=data.get("opis"),
                 nauczyciel_wpisujacy_id=data.get("nauczyciel_wpisujacy_id"),
             )
-            return JsonResponse({"id": zp.id, "message": "ZachowaniePunkty created"}, status=201)
+            return JsonResponse(
+                {"id": zp.id, "message": "ZachowaniePunkty created"}, status=201
+            )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
