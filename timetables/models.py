@@ -72,8 +72,9 @@ class Wydarzenie(models.Model):
     opis = models.TextField()
     data = models.DateTimeField()
     
-    #klasa = models.ForeignKey('Klasa', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
-    #przedmiot = models.ForeignKey('Przedmiot', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
+    # reference models in other apps explicitly (app_label.ModelName)
+    klasa = models.ForeignKey('users.Klasa', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
+    przedmiot = models.ForeignKey('utils.Przedmiot', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
     nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
 
     

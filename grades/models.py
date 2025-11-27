@@ -40,7 +40,8 @@ class OcenaOkresowa(models.Model):
     wartosc = models.DecimalField(max_digits=3, decimal_places=2)
 
     okres = models.IntegerField()  # 1 dla pierwszego okresu, 2 dla drugiego, itp.
-    # przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_okresowe')
+    # Make przedmiot nullable to avoid requiring a one-off default when applying migrations
+    przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny_okresowe', null=True, blank=True)
 
     nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -49,7 +50,12 @@ class OcenaOkresowa(models.Model):
         verbose_name_plural = "Oceny okresowe"
 
     def __str__(self):
-        return f"{self.uczen} - {self.przedmiot}: {self.wartosc} ({self.okres})"
+        # guard against deployments where the model on disk/db may not have
+        # the `przedmiot` attribute (older migrations or differing code); use
+        # getattr to avoid AttributeError in admin/list views.
+        przedmiot = getattr(self, 'przedmiot', None)
+        przedmiot_str = str(przedmiot) if przedmiot else "-"
+        return f"{self.uczen} - {przedmiot_str}: {self.wartosc} ({self.okres})"
     
         
 class OcenaKoncowa(models.Model):
