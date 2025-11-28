@@ -7,6 +7,10 @@ from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa, ZachowaniePunkty
 from authentication.api.services import admin_key_required
 
 
+def _to_string(value):
+    return str(value) if value is not None else None
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(admin_key_required, name="dispatch")
 class OcenaApiView(View):
@@ -16,13 +20,9 @@ class OcenaApiView(View):
                 ocena = Ocena.objects.get(pk=pk)
                 data = {
                     "id": ocena.id,
-                    "wartosc": str(ocena.wartosc),
-                    "data": (
-                        str(ocena.data_wystawienia)
-                        if getattr(ocena, "data_wystawienia", None) is not None
-                        else None
-                    ),
-                    "uczen_id": ocena.uczen.id,
+                    "wartosc": _to_string(ocena.wartosc),
+                    "data": _to_string(getattr(ocena, "data_wystawienia", None)),
+                    "uczen_id": ocena.uczen_id,
                     "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 }
                 return JsonResponse(data)
@@ -31,26 +31,28 @@ class OcenaApiView(View):
         else:
             oceny = Ocena.objects.all()
 
-            # Filter by user_id if provided
             user_id = request.GET.get("user_id")
             if user_id:
                 oceny = oceny.filter(uczen_id=user_id)
 
-            data = []
-            for ocena in oceny:
-                data.append(
-                    {
-                        "id": ocena.id,
-                        "wartosc": str(ocena.wartosc),
-                        "data": (
-                            str(ocena.data_wystawienia)
-                            if getattr(ocena, "data_wystawienia", None) is not None
-                            else None
-                        ),
-                        "uczen_id": ocena.uczen.id,
-                        "przedmiot_id": getattr(ocena, "przedmiot_id", None),
-                    }
-                )
+            oceny = oceny.values(
+                "id",
+                "wartosc",
+                "data_wystawienia",
+                "uczen_id",
+                "przedmiot_id",
+            )
+
+            data = [
+                {
+                    "id": entry["id"],
+                    "wartosc": _to_string(entry["wartosc"]),
+                    "data": _to_string(entry["data_wystawienia"]),
+                    "uczen_id": entry["uczen_id"],
+                    "przedmiot_id": entry.get("przedmiot_id"),
+                }
+                for entry in oceny
+            ]
             return JsonResponse(data, safe=False)
 
     def post(self, request):
@@ -68,13 +70,9 @@ class OcenaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena.id,
-                    "wartosc": str(ocena.wartosc),
-                    "data": (
-                        str(ocena.data_wystawienia)
-                        if getattr(ocena, "data_wystawienia", None) is not None
-                        else None
-                    ),
-                    "uczen_id": ocena.uczen.id,
+                    "wartosc": _to_string(ocena.wartosc),
+                    "data": _to_string(getattr(ocena, "data_wystawienia", None)),
+                    "uczen_id": ocena.uczen_id,
                     "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 },
                 status=201,
@@ -91,7 +89,7 @@ class OcenaApiView(View):
             # map incoming 'data' to model's 'data_wystawienia'
             if "data" in data:
                 ocena.data_wystawienia = data["data"]
-            ocena.uczen_id = data.get("uczen_id", ocena.uczen.id)
+            ocena.uczen_id = data.get("uczen_id", ocena.uczen_id)
             if "przedmiot_id" in data:
                 ocena.przedmiot_id = data.get(
                     "przedmiot_id", getattr(ocena, "przedmiot_id", None)
@@ -101,13 +99,9 @@ class OcenaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena.id,
-                    "wartosc": str(ocena.wartosc),
-                    "data": (
-                        str(ocena.data_wystawienia)
-                        if getattr(ocena, "data_wystawienia", None) is not None
-                        else None
-                    ),
-                    "uczen_id": ocena.uczen.id,
+                    "wartosc": _to_string(ocena.wartosc),
+                    "data": _to_string(getattr(ocena, "data_wystawienia", None)),
+                    "uczen_id": ocena.uczen_id,
                     "przedmiot_id": getattr(ocena, "przedmiot_id", None),
                 }
             )
@@ -134,9 +128,9 @@ class OcenaOkresowaApiView(View):
                 ocena_okresowa = OcenaOkresowa.objects.get(pk=pk)
                 data = {
                     "id": ocena_okresowa.id,
-                    "wartosc": str(ocena_okresowa.wartosc),
+                    "wartosc": _to_string(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
-                    "uczen_id": ocena_okresowa.uczen.id,
+                    "uczen_id": ocena_okresowa.uczen_id,
                     "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 }
                 return JsonResponse(data)
@@ -145,22 +139,28 @@ class OcenaOkresowaApiView(View):
         else:
             oceny_okresowe = OcenaOkresowa.objects.all()
 
-            # Filter by user_id if provided
             user_id = request.GET.get("user_id")
             if user_id:
                 oceny_okresowe = oceny_okresowe.filter(uczen_id=user_id)
 
-            data = []
-            for ocena_okresowa in oceny_okresowe:
-                data.append(
-                    {
-                        "id": ocena_okresowa.id,
-                        "wartosc": str(ocena_okresowa.wartosc),
-                        "okres": ocena_okresowa.okres,
-                        "uczen_id": ocena_okresowa.uczen.id,
-                        "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
-                    }
-                )
+            oceny_okresowe = oceny_okresowe.values(
+                "id",
+                "wartosc",
+                "okres",
+                "uczen_id",
+                "nauczyciel_id",
+            )
+
+            data = [
+                {
+                    "id": entry["id"],
+                    "wartosc": _to_string(entry["wartosc"]),
+                    "okres": entry["okres"],
+                    "uczen_id": entry["uczen_id"],
+                    "nauczyciel_id": entry.get("nauczyciel_id"),
+                }
+                for entry in oceny_okresowe
+            ]
             return JsonResponse(data, safe=False)
 
     def post(self, request):
@@ -178,9 +178,9 @@ class OcenaOkresowaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena_okresowa.id,
-                    "wartosc": str(ocena_okresowa.wartosc),
+                    "wartosc": _to_string(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
-                    "uczen_id": ocena_okresowa.uczen.id,
+                    "uczen_id": ocena_okresowa.uczen_id,
                     "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 },
                 status=201,
@@ -195,7 +195,7 @@ class OcenaOkresowaApiView(View):
 
             ocena_okresowa.wartosc = data.get("wartosc", ocena_okresowa.wartosc)
             ocena_okresowa.okres = data.get("okres", ocena_okresowa.okres)
-            ocena_okresowa.uczen_id = data.get("uczen_id", ocena_okresowa.uczen.id)
+            ocena_okresowa.uczen_id = data.get("uczen_id", ocena_okresowa.uczen_id)
             if "nauczyciel_id" in data:
                 ocena_okresowa.nauczyciel_id = data.get("nauczyciel_id")
             ocena_okresowa.save()
@@ -203,9 +203,9 @@ class OcenaOkresowaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena_okresowa.id,
-                    "wartosc": str(ocena_okresowa.wartosc),
+                    "wartosc": _to_string(ocena_okresowa.wartosc),
                     "okres": ocena_okresowa.okres,
-                    "uczen_id": ocena_okresowa.uczen.id,
+                    "uczen_id": ocena_okresowa.uczen_id,
                     "nauczyciel_id": getattr(ocena_okresowa, "nauczyciel_id", None),
                 }
             )
@@ -232,8 +232,8 @@ class OcenaKoncowaApiView(View):
                 ocena_koncowa = OcenaKoncowa.objects.get(pk=pk)
                 data = {
                     "id": ocena_koncowa.id,
-                    "wartosc": str(ocena_koncowa.wartosc),
-                    "uczen_id": ocena_koncowa.uczen.id,
+                    "wartosc": _to_string(ocena_koncowa.wartosc),
+                    "uczen_id": ocena_koncowa.uczen_id,
                     "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
                     "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 }
@@ -243,22 +243,28 @@ class OcenaKoncowaApiView(View):
         else:
             oceny_koncowe = OcenaKoncowa.objects.all()
 
-            # Filter by user_id if provided
             user_id = request.GET.get("user_id")
             if user_id:
                 oceny_koncowe = oceny_koncowe.filter(uczen_id=user_id)
 
-            data = []
-            for ocena_koncowa in oceny_koncowe:
-                data.append(
-                    {
-                        "id": ocena_koncowa.id,
-                        "wartosc": str(ocena_koncowa.wartosc),
-                        "uczen_id": ocena_koncowa.uczen.id,
-                        "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
-                        "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
-                    }
-                )
+            oceny_koncowe = oceny_koncowe.values(
+                "id",
+                "wartosc",
+                "uczen_id",
+                "przedmiot_id",
+                "nauczyciel_id",
+            )
+
+            data = [
+                {
+                    "id": entry["id"],
+                    "wartosc": _to_string(entry["wartosc"]),
+                    "uczen_id": entry["uczen_id"],
+                    "przedmiot_id": entry.get("przedmiot_id"),
+                    "nauczyciel_id": entry.get("nauczyciel_id"),
+                }
+                for entry in oceny_koncowe
+            ]
             return JsonResponse(data, safe=False)
 
     def post(self, request):
@@ -275,8 +281,8 @@ class OcenaKoncowaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena_koncowa.id,
-                    "wartosc": str(ocena_koncowa.wartosc),
-                    "uczen_id": ocena_koncowa.uczen.id,
+                    "wartosc": _to_string(ocena_koncowa.wartosc),
+                    "uczen_id": ocena_koncowa.uczen_id,
                     "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
                     "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 },
@@ -291,7 +297,7 @@ class OcenaKoncowaApiView(View):
             data = json.loads(request.body)
 
             ocena_koncowa.wartosc = data.get("wartosc", ocena_koncowa.wartosc)
-            ocena_koncowa.uczen_id = data.get("uczen_id", ocena_koncowa.uczen.id)
+            ocena_koncowa.uczen_id = data.get("uczen_id", ocena_koncowa.uczen_id)
             if "przedmiot_id" in data:
                 ocena_koncowa.przedmiot_id = data.get("przedmiot_id")
             if "nauczyciel_id" in data:
@@ -301,8 +307,8 @@ class OcenaKoncowaApiView(View):
             return JsonResponse(
                 {
                     "id": ocena_koncowa.id,
-                    "wartosc": str(ocena_koncowa.wartosc),
-                    "uczen_id": ocena_koncowa.uczen.id,
+                    "wartosc": _to_string(ocena_koncowa.wartosc),
+                    "uczen_id": ocena_koncowa.uczen_id,
                     "przedmiot_id": getattr(ocena_koncowa, "przedmiot_id", None),
                     "nauczyciel_id": getattr(ocena_koncowa, "nauczyciel_id", None),
                 }
@@ -330,12 +336,12 @@ class ZachowaniePunktyApiView(View):
                 zp = ZachowaniePunkty.objects.get(pk=pk)
                 data = {
                     "id": zp.id,
-                    "uczen_id": zp.uczen.id,
+                    "uczen_id": zp.uczen_id,
                     "punkty": zp.punkty,
                     "opis": zp.opis,
-                    "data_wpisu": zp.data_wpisu,
-                    "nauczyciel_wpisujacy_id": (
-                        zp.nauczyciel_wpisujacy.id if zp.nauczyciel_wpisujacy else None
+                    "data_wpisu": _to_string(getattr(zp, "data_wpisu", None)),
+                    "nauczyciel_wpisujacy_id": getattr(
+                        zp, "nauczyciel_wpisujacy_id", None
                     ),
                 }
                 return JsonResponse(data)
@@ -346,26 +352,28 @@ class ZachowaniePunktyApiView(View):
             qs = ZachowaniePunkty.objects.all()
             if user_id:
                 qs = qs.filter(uczen_id=user_id)
-            data = []
-            for zp in qs:
-                data.append(
-                    {
-                        "id": zp.id,
-                        "uczen_id": zp.uczen.id,
-                        "punkty": zp.punkty,
-                        "opis": zp.opis,
-                        "data_wpisu": (
-                            str(zp.data_wpisu)
-                            if getattr(zp, "data_wpisu", None) is not None
-                            else None
-                        ),
-                        "nauczyciel_wpisujacy_id": (
-                            zp.nauczyciel_wpisujacy.id
-                            if zp.nauczyciel_wpisujacy
-                            else None
-                        ),
-                    }
-                )
+            qs = qs.values(
+                "id",
+                "uczen_id",
+                "punkty",
+                "opis",
+                "data_wpisu",
+                "nauczyciel_wpisujacy_id",
+            )
+
+            data = [
+                {
+                    "id": entry["id"],
+                    "uczen_id": entry["uczen_id"],
+                    "punkty": entry["punkty"],
+                    "opis": entry.get("opis"),
+                    "data_wpisu": _to_string(entry.get("data_wpisu")),
+                    "nauczyciel_wpisujacy_id": entry.get(
+                        "nauczyciel_wpisujacy_id"
+                    ),
+                }
+                for entry in qs
+            ]
             return JsonResponse(data, safe=False)
 
     def post(self, request):
