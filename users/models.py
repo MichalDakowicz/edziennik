@@ -1,5 +1,14 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class User(AbstractUser):
+    user_id = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        verbose_name = 'Użytkownik'
+        verbose_name_plural = 'Użytkownicy'
 
 THEME_CHOICES = [
         ('light', 'Jasny'),
@@ -47,7 +56,6 @@ class Klasa(models.Model):
     objects = models.Manager()
     
     
-    
     active = models.Manager()
 
     def __str__(self):
@@ -89,6 +97,10 @@ class Rodzic(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+    
+    class Meta():
+        verbose_name = "Rodzic"
+        verbose_name_plural = "Rodzice"
 
 
 class UserProfile(models.Model):
@@ -155,4 +167,15 @@ class Wiadomosc(models.Model):
         verbose_name = "Wiadomość"
         verbose_name_plural = "Wiadomości"
         ordering = ['-data_wyslania']
+
+
+@receiver(post_save, sender=Uczen)
+@receiver(post_save, sender=Nauczyciel)
+@receiver(post_save, sender=Rodzic)
+def update_user_id(sender, instance, created, **kwargs):
+    user = instance.user
+    if user.user_id != instance.id:
+        user.user_id = instance.id
+        user.save()
+
 

@@ -3,11 +3,14 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from users.models import Uczen, Nauczyciel, Rodzic, UserProfile, Klasa, Adres
 from users.models import Wiadomosc
 from authentication.api.services import admin_key_required
 from django.db.models import Q
+
+User = get_user_model()
+
 
 
 @method_decorator(csrf_exempt, name="dispatch")

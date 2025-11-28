@@ -219,3 +219,5 @@ JAZZMIN_SETTINGS = {
     "site_header": "Edziennik",
     "site_brand": "Edziennik",
 }
+
+AUTH_USER_MODEL = 'users.User'

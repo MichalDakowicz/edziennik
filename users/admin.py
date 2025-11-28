@@ -1,5 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import (
+	User,
 	Uczen,
 	Nauczyciel,
 	Rodzic,
@@ -8,6 +10,11 @@ from .models import (
 	Klasa,
 	Adres,
 )
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ("id", "username", "first_name", "last_name", "email", "user_id")
+
 
 
 @admin.register(Uczen)

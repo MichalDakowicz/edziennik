@@ -32,8 +32,10 @@ except Exception as e:
     print("Ensure you run this from the project root and that Django is installed.")
     raise
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import transaction
+
+User = get_user_model()
 
 # Project models (adapted to this repo)
 from users.models import Klasa, Nauczyciel, Uczen, Adres, Rodzic
@@ -222,8 +224,15 @@ def populate_nauczyciele(przedmioty, klasy):
         nauczyciele_instances.append(Nauczyciel(user=user, telefon=telefon))
 
     if nauczyciele_instances:
-        Nauczyciel.objects.bulk_create(nauczyciele_instances)
+        created_nauczyciele = Nauczyciel.objects.bulk_create(nauczyciele_instances)
         print(f"  Bulk created {len(nauczyciele_instances)} nauczyciele")
+        
+        # Update user_ids manually because bulk_create doesn't trigger signals
+        users_to_update = []
+        for n in created_nauczyciele:
+            n.user.user_id = n.id
+            users_to_update.append(n.user)
+        User.objects.bulk_update(users_to_update, ['user_id'])
 
     # assign subjects to some teachers (M2M exists on Przedmiot.nauczyciele)
     nauczyciele_qs = Nauczyciel.objects.all()
@@ -277,8 +286,16 @@ def populate_uczniowie(klasy):
             uczniowie_instances.append(Uczen(user=user, klasa=kl, telefon=telefon_uczen, data_urodzenia=birth, adres=adres))
 
     if uczniowie_instances:
-        Uczen.objects.bulk_create(uczniowie_instances)
+        created_uczniowie = Uczen.objects.bulk_create(uczniowie_instances)
         print(f"  Bulk created {len(uczniowie_instances)} uczniowie")
+        
+        # Update user_ids manually because bulk_create doesn't trigger signals
+        users_to_update = []
+        for u in created_uczniowie:
+            u.user.user_id = u.id
+            users_to_update.append(u.user)
+        User.objects.bulk_update(users_to_update, ['user_id'])
+
     return Uczen.objects.all()
 
 

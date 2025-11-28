@@ -57,6 +57,9 @@ sudo "$TARGET_DIR/.venv/bin/pip" install -r "$TARGET_DIR/requirements.txt"
 echo "Collecting static files..."
 sudo "$TARGET_DIR/.venv/bin/python" "$TARGET_DIR/manage.py" collectstatic --noinput
 
+echo "Making migrations..."
+sudo "$TARGET_DIR/.venv/bin/python" "$TARGET_DIR/manage.py" makemigrations
+
 echo "Migrating database..."
 sudo "$TARGET_DIR/.venv/bin/python" "$TARGET_DIR/manage.py" migrate
 

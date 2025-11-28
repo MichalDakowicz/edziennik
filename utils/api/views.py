@@ -5,9 +5,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from utils.models import Przedmiot, Temat, PracaDomowa, DataSource
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from authentication.api.services import admin_key_required
 from django.utils import timezone
+
+User = get_user_model()
+
 
 
 @method_decorator(csrf_exempt, name="dispatch")
