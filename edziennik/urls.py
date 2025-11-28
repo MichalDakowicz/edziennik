@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/", include("timetables.api.urls")),
     path("api/", include("attendance.api.urls")),
     path("api/", include("utils.api.urls")),
-    
     path("api/auth/", include("authentication.api.urls")),
+    # Template-based views for grades
+    path("grades/", include("grades.urls")),
 ]

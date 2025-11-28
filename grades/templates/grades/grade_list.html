@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista ocen - eDziennik</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .page-container {
+            max-width: 1000px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .page-title {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .grade-badge {
+            font-size: 1.1rem;
+            min-width: 45px;
+        }
+        .grade-1 { background-color: #dc3545; }
+        .grade-2 { background-color: #fd7e14; }
+        .grade-3 { background-color: #ffc107; color: #212529; }
+        .grade-4 { background-color: #20c997; }
+        .grade-5 { background-color: #198754; }
+        .grade-6 { background-color: #0d6efd; }
+        .table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="page-title mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-journal-text me-2" viewBox="0 0 16 16">
+                        <path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                        <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1H2v.5a.5.5 0 0 1-1 0V6h-.5a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1H2v.5a.5.5 0 0 1-1 0V9h-.5a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1H2v.5a.5.5 0 0 1-1 0v-.5h-.5a.5.5 0 0 1 0-1H1z"/>
+                    </svg>
+                    Lista ocen
+                </h2>
+                <a href="{% url 'grades:add_grade' %}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                    </svg>
+                    Dodaj ocenę
+                </a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if oceny %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Ocena</th>
+                                <th>Uczeń</th>
+                                <th>Przedmiot</th>
+                                <th>Waga</th>
+                                <th>Opis</th>
+                                <th>Data</th>
+                                <th>Nauczyciel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ocena in oceny %}
+                                <tr>
+                                    <td>
+                                        {% with grade_int=ocena.wartosc|floatformat:0 %}
+                                            <span class="badge grade-badge grade-{{ grade_int }}">
+                                                {{ ocena.wartosc }}
+                                            </span>
+                                        {% endwith %}
+                                        {% if not ocena.czy_do_sredniej %}
+                                            <span class="badge bg-secondary" title="Nie liczy się do średniej">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ocena.uczen.user.first_name }} {{ ocena.uczen.user.last_name }}</td>
+                                    <td>{{ ocena.przedmiot.nazwa }}</td>
+                                    <td>{{ ocena.waga }}</td>
+                                    <td>{{ ocena.opis|default:"-" }}</td>
+                                    <td>{{ ocena.data_wystawienia|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        {% if ocena.nauczyciel %}
+                                            {{ ocena.nauczyciel.user.first_name }} {{ ocena.nauczyciel.user.last_name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-inbox text-muted mb-3" viewBox="0 0 16 16">
+                        <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+                    </svg>
+                    <p class="text-muted">Brak ocen do wyświetlenia</p>
+                    <a href="{% url 'grades:add_grade' %}" class="btn btn-outline-primary">Dodaj pierwszą ocenę</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
