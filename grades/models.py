@@ -21,7 +21,7 @@ class Ocena(models.Model):
     czy_do_sredniej=models.BooleanField(default=True)
     
     uczen = models.ForeignKey(Uczen, on_delete=models.CASCADE, related_name='oceny')
-    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, null=True, related_name='wystawione_oceny')
+    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, related_name='wystawione_oceny')
     
     przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='oceny')
     
