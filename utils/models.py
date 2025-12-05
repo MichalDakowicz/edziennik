@@ -62,7 +62,7 @@ class PracaDomowa(models.Model):
     active = models.Manager()
 
     def __str__(self):
-        return f"Praca domowa z {self.przedmiot} dla klasy {self.klasa} - {self.data_wystawienia.strftime('%Y-%m-%d')}"
+        return f"Praca domowa z {self.przedmiot} dla klasy {self.klasa} - {self.data_wystawienia.strftime('%d.%m.%Y')}"
 
     class Meta:
         verbose_name = "Praca domowa"

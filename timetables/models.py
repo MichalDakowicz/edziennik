@@ -82,7 +82,7 @@ class Wydarzenie(models.Model):
     active = models.Manager()
 
     def __str__(self):
-        return f"Wydarzenie: {self.tytul} - {self.data.strftime('%Y-%m-%d')}"
+        return f"Wydarzenie: {self.tytul} - {self.data.strftime('%d.%m.%Y')}"
 
     class Meta:
         verbose_name = "Wydarzenie"

@@ -89,7 +89,7 @@ class ZachowaniePunkty(models.Model):
 
     def __str__(self):
         znak = "+" if self.punkty > 0 else ""
-        return f"{self.uczen} - {znak}{self.punkty} pkt ({self.data_wpisu.strftime('%Y-%m-%d')})"
+        return f"{self.uczen} - {znak}{self.punkty} pkt ({self.data_wpisu.strftime('%d.%m.%Y')})"
 
     class Meta:
         verbose_name = "Punkt z zachowania"
