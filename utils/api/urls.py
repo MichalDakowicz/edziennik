@@ -1,14 +1,18 @@
-from django.urls import path
-from .views import PrzedmiotApiView, TematApiView, PracaDomowaApiView, DataSourceApiView
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+from .views import (
+    PrzedmiotViewSet,
+    TematViewSet,
+    PracaDomowaViewSet,
+    DataSourceViewSet,
+)
+
+router = DefaultRouter()
+router.register(r"przedmioty", PrzedmiotViewSet)
+router.register(r"tematy", TematViewSet)
+router.register(r"prace-domowe", PracaDomowaViewSet)
+router.register(r"datasource", DataSourceViewSet)
 
 urlpatterns = [
-    path("przedmioty/", PrzedmiotApiView.as_view(), name="przedmiot-list"),
-    path("przedmioty/<int:pk>/", PrzedmiotApiView.as_view(), name="przedmiot-detail"),
-
-    path("tematy/", TematApiView.as_view(), name="temat-list"),
-    path("tematy/<int:pk>/", TematApiView.as_view(), name="temat-detail"),
-    
-    path("prace-domowe/", PracaDomowaApiView.as_view(), name="praca-list"),
-    path("prace-domowe/<int:pk>/", PracaDomowaApiView.as_view(), name="praca-detail"),
-    path("datasource/", DataSourceApiView.as_view(), name="datasource"),
+    path("", include(router.urls)),
 ]

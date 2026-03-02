@@ -1,10 +1,11 @@
-from django.urls import path
-from .views import StatusApiView, FrekwencjaApiView
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+from .views import StatusyObecnosciViewSet, FrekwencjaViewSet
+
+router = DefaultRouter()
+router.register(r"statusy", StatusyObecnosciViewSet)
+router.register(r"frekwencja", FrekwencjaViewSet)
 
 urlpatterns = [
-	path("statusy/", StatusApiView.as_view(), name="status-list"),
-	path("statusy/<int:pk>/", StatusApiView.as_view(), name="status-detail"),
-
-	path("frekwencja/", FrekwencjaApiView.as_view(), name="frekwencja-list"),
-	path("frekwencja/<int:pk>/", FrekwencjaApiView.as_view(), name="frekwencja-detail"),
+    path("", include(router.urls)),
 ]

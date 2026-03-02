@@ -1,29 +1,22 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
 from .views import (
-    GodzinyLekcyjneApiView,
-    DniTygodniaApiView,
-    ZajeciaApiView,
-    PlanWpisApiView,
-    PlanyZajecApiView,
-    WydarzenieApiView,
+    PlanyZajecViewSet,
+    GodzinyLekcyjneViewSet,
+    DniTygodniaViewSet,
+    ZajeciaViewSet,
+    PlanWpisViewSet,
+    WydarzenieViewSet,
 )
 
+router = DefaultRouter()
+router.register(r"plany-zajec", PlanyZajecViewSet)
+router.register(r"godziny-lekcyjne", GodzinyLekcyjneViewSet)
+router.register(r"dni-tygodnia", DniTygodniaViewSet)
+router.register(r"zajecia", ZajeciaViewSet)
+router.register(r"plan-wpisy", PlanWpisViewSet)
+router.register(r"wydarzenia", WydarzenieViewSet)
+
 urlpatterns = [
-    path("godziny-lekcyjne/", GodzinyLekcyjneApiView.as_view(), name="godziny-list"),
-    path("godziny-lekcyjne/<int:pk>/", GodzinyLekcyjneApiView.as_view(), name="godziny-detail"),
-
-    path("dni-tygodnia/", DniTygodniaApiView.as_view(), name="dni-list"),
-    path("dni-tygodnia/<int:pk>/", DniTygodniaApiView.as_view(), name="dni-detail"),
-
-    path("zajecia/", ZajeciaApiView.as_view(), name="zajecia-list"),
-    path("zajecia/<int:pk>/", ZajeciaApiView.as_view(), name="zajecia-detail"),
-
-    path("plan-wpisy/", PlanWpisApiView.as_view(), name="planwpis-list"),
-    path("plan-wpisy/<int:pk>/", PlanWpisApiView.as_view(), name="planwpis-detail"),
-
-    path("plany-zajec/", PlanyZajecApiView.as_view(), name="plany-list"),
-    path("plany-zajec/<int:pk>/", PlanyZajecApiView.as_view(), name="plany-detail"),
-    
-    path("wydarzenia/", WydarzenieApiView.as_view(), name="wydarzenia-list"),
-    path("wydarzenia/<int:pk>/", WydarzenieApiView.as_view(), name="wydarzenia-detail"),
+    path("", include(router.urls)),
 ]

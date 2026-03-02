@@ -1,148 +1,75 @@
-# `utils` - Endpointy API dla pomocniczych modeli (Przedmioty, Tematy)
+# API Narzędzi (Utils)
 
-Wszystkie endpointy wymagają nagłówka `ADMIN-KEY` (tak jak inne moduły API w projekcie).
+**Bazowy URL**: `/api/`
 
-## `Przedmioty`
+API Utils zapewnia dostęp do zasobów pomocniczych, takich jak przedmioty, tematy lekcji, prace domowe oraz konfiguracja źródeł danych.
 
-- GET (lista przedmiotów)
+## Uwierzytelnianie
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/przedmioty/" `
-   -H "ADMIN-KEY: "
-```
+Wymaga nagłówka `Authorization: Bearer <token>` LUB `ADMIN-KEY: <key>`.
 
-- GET (pojedynczy przedmiot)
+## Przedmioty
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/przedmioty/1/ `
-   -H "ADMIN-KEY: "
-```
+Zarządzanie przedmiotami szkolnymi.
 
-- POST (utworzenie przedmiotu)
+**Endpoint**: `/api/przedmioty/`
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/przedmioty/ `
-   -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"nazwa\": \"Matematyka\", \"nazwa_skrocona\": \"Mat\", \"numer\": 1, \"czy_dodatkowy\": false, \"nauczyciele\": [2,3] }'
-```
+### Pola
 
-- PUT (aktualizacja przedmiotu)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `nazwa`: Ciąg znaków (Unikalna nazwa)
+- `nazwa_skrocona`: Ciąg znaków (Skrót)
+- `numer`: Liczba całkowita (Liczba porządkowa)
+- `czy_dodatkowy`: Wartość logiczna
+- `nauczyciele`: Lista ID Nauczycieli (Relacja wiele-do-wielu)
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/przedmioty/1/ `
-   -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"nazwa\": \"Matematyka - new\", \"nazwa_skrocona\": \"M\", \"nauczyciele\": [2] }'
-```
+## Tematy
 
-- DELETE (usunięcie przedmiotu)
+Zarządzanie tematami lekcji dla poszczególnych przedmiotów.
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/przedmioty/1/ `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/tematy/`
 
-## `Tematy`
+### Pola
 
-- GET (lista tematów)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `tresc`: Ciąg znaków (Treść tematu)
+- `data`: Data (RRRR-MM-DD)
+- `numer_lekcji`: Liczba całkowita
+- `czas_realizacji`: Liczba całkowita (Minuty)
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/tematy/" `
-   -H "ADMIN-KEY: "
-```
+## Prace Domowe
 
-- GET (pojedynczy temat)
+Zarządzanie zadaniami domowymi.
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/tematy/1/ `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/prace-domowe/`
 
-- POST (utworzenie tematu)
+### Filtrowanie
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/tematy/ `
-   -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"tresc\": \"Wprowadzenie do równań\", \"data\": \"2025-11-24\", \"numer_lekcji\": 1, \"przedmiot_id\": 1, \"nauczyciel_id\": 5 }'
-```
+- `?klasa_id=<id>`: Filtruj po Klasie.
+- `?przedmiot_id=<id>`: Filtruj po Przedmiocie.
+- `?nauczyciel_id=<id>`: Filtruj po Nauczycielu.
 
-- PUT (aktualizacja tematu)
+### Pola
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/tematy/1/ `
-   -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"tresc\": \"Zaktualizowany temat\"}'
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `opis`: Ciąg znaków (Treść zadania HTML/Tekst)
+- `termin`: Data (Termin oddania)
+- `data_wystawienia`: Data i czas (Tylko do odczytu)
+- `klasa`: Liczba całkowita (Klucz obcy do Klasy)
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela)
 
-- DELETE (usunięcie tematu)
+## Źródło Danych (Konfiguracja)
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/tematy/1/ `
-   -H "ADMIN-KEY: "
-```
+Zarządzanie konfiguracją źródła importu danych.
 
-## `Prace domowe` (Homework)
+**Endpoint**: `/api/datasource/`
 
--   GET (lista prac domowych)
+### Pola
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (filtrowanie po klasie/przedmiocie/nauczycielu)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/?klasa_id=1&przedmiot_id=2" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (pojedyncza praca domowa)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie pracy domowej)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"klasa_id\":1, \"przedmiot_id\":2, \"nauczyciel_id\":5, \"opis\": \"Zadanie domowe\", \"termin\": \"2025-12-01\"}'
-```
-
--   PUT (aktualizacja pracy domowej)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"opis\":\"Zmienione zadanie\", \"termin\":\"2025-12-05\"}'
-```
-
--   DELETE (usunięcie pracy domowej)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/prace-domowe/1/ `
-   -H "ADMIN-KEY: "
-```
-
-## `DataSource` (active data source / import info)
-
--   GET (get current active source and last import info)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/datasource/" `
-   -H "ADMIN-KEY: "
-```
-
--   POST (set active source and optional last_import_file)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/datasource/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"active_source\": \"local\", \"last_import_file\": \"import.csv\" }'
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `active_source`: Wybór (`local`, `external`)
+- `last_import_file`: Ciąg znaków (Ostatni plik importu)
+- `last_imported_at`: Data i czas (Tylko do odczytu)

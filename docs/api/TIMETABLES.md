@@ -1,244 +1,89 @@
-# `timetables` - Endpointy API dla zarządzania planami zajęć.
+# API Planów Lekcji (Timetables)
 
-Poniżej znajdują się opisane endpointy dostępne dla modułu planów zajęć. Wzorzec requestów i nagłówków zgodny z innymi dokumentacjami API (zob. `USERS.md`, `GRADES.md`). Wszystkie żądania wymagają nagłówka `ADMIN-KEY`.
+**Bazowy URL**: `/api/`
 
-## `Godziny Lekcyjne`
+API Planów Lekcji zarządza strukturą dnia szkolnego, zajęciami oraz kalendarzem wydarzeń.
 
--   GET (lista godzin lekcyjnych)
+## Uwierzytelnianie
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/" `
-   -H "ADMIN-KEY: "
-```
+Wymaga nagłówka `Authorization: Bearer <token>` LUB `ADMIN-KEY: <key>`.
 
--   GET (pojedyncza godzina lekcyjna)
+## Plany Zajęć
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/1/ `
-   -H "ADMIN-KEY: "
-```
+Zarządzanie tygodniowymi planami lekcji dla klas.
 
--   POST (utworzenie godziny lekcyjnej)
+**Endpoint**: `/api/plany-zajec/`
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"Numer\": 1, \"CzasOd\": \"08:00\", \"CzasDo\": \"08:45\", \"CzasTrwania\": \"00:45:00\"}'
-```
+### Pola
 
--   PUT (aktualizacja godziny lekcyjnej)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `klasa`: Liczba całkowita (Klucz obcy do Klasy)
+- `ObowiazujeOdDnia`: Data (np. "2023-09-01")
+- `wpisy`: Lista liczb całkowitych (ID obiektów PlanWpis)
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"Numer\": 2, \"CzasOd\": \"08:15\", \"CzasDo\": \"09:00\", \"CzasTrwania\": \"00:45:00\"}'
-```
+## Godziny Lekcyjne
 
--   DELETE (usunięcie godziny lekcyjnej)
+Zarządzanie siatką godzin lekcyjnych.
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/godziny-lekcyjne/1/ `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/godziny-lekcyjne/`
 
-## `Dni Tygodnia`
+### Pola
 
--   GET (lista dni tygodnia)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `Numer`: Liczba całkowita (Numer lekcji, np. 1, 2)
+- `CzasOd`: Czas (np. "08:00")
+- `CzasDo`: Czas (np. "08:45")
+- `CzasTrwania`: Liczba całkowita (Długość w minutach)
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/" `
-   -H "ADMIN-KEY: "
-```
+## Dni Tygodnia
 
--   GET (pojedynczy dzień)
+Metadane dni tygodnia.
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/1/ `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/dni-tygodnia/`
 
--   POST (utworzenie dnia tygodnia)
+### Pola
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"Nazwa\": \"Poniedziałek\", \"Numer\": 1}'
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `Nazwa`: Ciąg znaków (np. "Poniedziałek")
+- `Numer`: Liczba całkowita (1-7)
 
--   PUT (aktualizacja dnia tygodnia)
+## Zajęcia
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"Nazwa\": \"Poniedziałek\", \"Numer\": 1}'
-```
+Definicja konkretnych zajęć (Przedmiot + Nauczyciel).
 
--   DELETE (usunięcie dnia tygodnia)
+**Endpoint**: `/api/zajecia/`
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/dni-tygodnia/1/ `
-   -H "ADMIN-KEY: "
-```
+### Pola
 
-## `Zajęcia`
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)
 
--   GET (lista zajęć)
+## Wpisy do Planu (Plan Wpis)
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/" `
-   -H "ADMIN-KEY: "
-```
+Łączy `Zajęcia` z konkretną `Godziną Lekcyjną` i `Dniem Tygodnia`.
 
--   GET (pojedyncze zajęcia)
+**Endpoint**: `/api/plan-wpisy/`
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/1/ `
-   -H "ADMIN-KEY: "
-```
+### Pola
 
--   POST (utworzenie zajęć)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `godzina_lekcyjna`: Liczba całkowita (Klucz obcy)
+- `dzien_tygodnia`: Liczba całkowita (Klucz obcy)
+- `zajecia`: Liczba całkowita (Klucz obcy)
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"nauczyciel_id\": 5}'
-```
+## Wydarzenia (Kalendarz)
 
--   PUT (aktualizacja zajęć)
+Zarządzanie wydarzeniami szkolnymi (sprawdziany, święta, wycieczki).
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"nauczyciel_id\": 6}'
-```
+**Endpoint**: `/api/wydarzenia/`
 
--   DELETE (usunięcie zajęć)
+### Pola
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/zajecia/1/ `
-   -H "ADMIN-KEY: "
-```
-
-## `Plan Wpisy` (pozycje w planie)
-
--   GET (lista wpisów)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (pojedynczy wpis)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie wpisu w planie)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"godzina_lekcyjna_id\": 1, \"dzien_tygodnia_id\": 1, \"zajecia_id\": 3}'
-```
-
--   PUT (aktualizacja wpisu)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"godzina_lekcyjna_id\": 2, \"dzien_tygodnia_id\": 1, \"zajecia_id\": 4}'
-```
-
--   DELETE (usunięcie wpisu)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/plan-wpisy/1/ `
-   -H "ADMIN-KEY: "
-```
-
-## `Plany Zajęć`
-
--   GET (lista planów zajęć)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (pojedynczy plan)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie planu)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"ObowiazujeOdDnia\": \"2025-09-01\", \"wpisy\": [1,2,3]}'
-```
-
--   PUT (aktualizacja planu)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"ObowiazujeOdDnia\": \"2025-09-15\", \"wpisy\": [2,4]}'
-```
-
--   DELETE (usunięcie planu)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/plany-zajec/1/ `
-   -H "ADMIN-KEY: "
-```
-
-## `Wydarzenia`
-
--   GET (lista wydarzeń)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (lista wydarzeń dla klasy / nauczyciela / przedmiotu — filtry `klasa_id`, `nauczyciel_id`, `przedmiot_id`)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/?klasa_id=1&nauczyciel_id=5" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (pojedyncze wydarzenie)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie wydarzenia)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"tytul\": \"Wycieczka\", \"opis\": \"Wyjazd edukacyjny\", \"data\": \"2025-12-01T09:00:00Z\", \"klasa_id\": 2, \"nauczyciel_id\": 5}'
-```
-
--   PUT (aktualizacja wydarzenia)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"tytul\": \"Zaktualizowany tytuł\", \"data\": \"2025-12-02T10:00:00Z\"}'
-```
-
--   DELETE (usunięcie wydarzenia)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/wydarzenia/1/ `
-   -H "ADMIN-KEY: "
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `tytul`: Ciąg znaków (Tytuł wydarzenia)
+- `opis`: Ciąg znaków (Opis)
+- `data`: Data i czas (Data wydarzenia)
+- `klasa`: Liczba całkowita (Klucz obcy, Opcjonalne)
+- `przedmiot`: Liczba całkowita (Klucz obcy, Opcjonalne)
+- `nauczyciel`: Liczba całkowita (Klucz obcy, Opcjonalne)

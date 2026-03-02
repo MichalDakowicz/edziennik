@@ -1,96 +1,59 @@
-````markdown
-# `attendance` - Endpointy API dla zarządzania frekwencją i statusami obecności.
+# API Frekwencji (Attendance)
 
-## `StatusyObecnosci`
+**Bazowy URL**: `/api/`
 
--   GET (lista statusów)
+API Frekwencji umożliwia zarządzanie rekordami obecności uczniów oraz statusami obecności.
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/statusy/" `
-   -H "ADMIN-KEY: "
-```
+## Uwierzytelnianie
 
--   GET (pojedynczy status)
+Wymaga nagłówka `Authorization: Bearer <token>` LUB `ADMIN-KEY: <key>`.
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/statusy/1/ `
-   -H "ADMIN-KEY: "
-```
+## Statusy Obecności
 
--   POST (utworzenie statusu)
+Zarządzanie typami statusów obecności (np. Obecny, Nieobecny, Spóźniony).
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/statusy/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": \"Obecny\"}'
-```
+**Endpoint**: `/api/statusy/`
 
--   PUT (aktualizacja statusu)
+| Metoda | URL                  | Opis                                    |
+| ------ | -------------------- | --------------------------------------- |
+| GET    | `/api/statusy/`      | Pobierz listę wszystkich statusów       |
+| POST   | `/api/statusy/`      | Utwórz nowy status                      |
+| GET    | `/api/statusy/{id}/` | Pobierz szczegóły statusu               |
+| PUT    | `/api/statusy/{id}/` | Zaktualizuj status (pełna aktualizacja) |
+| PATCH  | `/api/statusy/{id}/` | Częściowo zaktualizuj status            |
+| DELETE | `/api/statusy/{id}/` | Usuń status                             |
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/statusy/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": \"Nieobecny\"}'
-```
+### Pola
 
--   DELETE (usunięcie statusu)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `Wartosc`: Ciąg znaków (Maks. 45 znaków) — Nazwa statusu (np. "Obecny")
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/statusy/1/ `
-   -H "ADMIN-KEY: "
-```
+## Frekwencja
 
-## `Frekwencja`
+Zarządzanie indywidualnymi wpisami obecności dla uczniów.
 
--   GET (lista wpisów frekwencji)
+**Endpoint**: `/api/frekwencja/`
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/" `
-   -H "ADMIN-KEY: "
-```
+| Metoda | URL                     | Opis                           |
+| ------ | ----------------------- | ------------------------------ |
+| GET    | `/api/frekwencja/`      | Pobierz listę wpisów obecności |
+| POST   | `/api/frekwencja/`      | Utwórz nowy wpis obecności     |
+| GET    | `/api/frekwencja/{id}/` | Pobierz szczegóły wpisu        |
+| PUT    | `/api/frekwencja/{id}/` | Zaktualizuj wpis               |
+| PATCH  | `/api/frekwencja/{id}/` | Częściowo zaktualizuj wpis     |
+| DELETE | `/api/frekwencja/{id}/` | Usuń wpis                      |
 
--   GET (lista frekwencji dla konkretnego ucznia)
+### Filtrowanie
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/?uczen_id=1" `
-   -H "ADMIN-KEY: "
-```
+Możesz filtrować listę wpisów używając parametrów w adresie URL:
 
--   GET (lista frekwencji dla konkretnej daty)
+- `?uczen_id=<id>`: Filtruj po ID ucznia
+- `?date=<YYYY-MM-DD>`: Filtruj po dacie
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/?date=2025-11-24" `
-   -H "ADMIN-KEY: "
-```
+### Pola
 
--   GET (pojedynczy wpis frekwencji)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie wpisu frekwencji)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"data\":\"2025-11-24\", \"uczen_id\": 1, \"godzina_lekcyjna_id\": 2, \"status_id\": 1}'
-```
-
--   PUT (aktualizacja wpisu frekwencji)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"data\":\"2025-11-24\", \"uczen_id\": 1, \"godzina_lekcyjna_id\": 2, \"status_id\": 2}'
-```
-
--   DELETE (usunięcie wpisu frekwencji)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/frekwencja/1/ `
-   -H "ADMIN-KEY: "
-```
-
-````
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `Data`: Data (RRRR-MM-DD)
+- `uczen`: Liczba całkowita (Klucz obcy do Ucznia)
+- `godzina_lekcyjna`: Liczba całkowita (Klucz obcy do GodzinyLekcyjne, Opcjonalne)
+- `status`: Liczba całkowita (Klucz obcy do StatusyObecnosci, Opcjonalne)

@@ -1,184 +1,95 @@
-# `grades` - Endpointy API dla zarządzania ocenami i ocenami z zachowania.
+# API Ocen (Grades)
 
-## `Oceny`
+**Bazowy URL**: `/api/`
 
--   GET (lista ocen)
+API Ocen umożliwia zarządzanie ocenami uczniów, ocenami okresowymi i końcowymi oraz punktami z zachowania.
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/" `   -H "ADMIN-KEY: "
-```
+## Uwierzytelnianie
 
--   GET (lista ocen dla konkretnego użytkownika)
+Wymaga nagłówka `Authorization: Bearer <token>` LUB `ADMIN-KEY: <key>`.
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/?user_id=1" `
-   -H "ADMIN-KEY: "
-```
+## Oceny (Zwykłe)
 
--   GET (pojedyncza ocena)
+Zarządzanie pojedynczymi ocenami cząstkowymi.
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/1/ `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/oceny/`
 
--   POST (utworzenie oceny)
+| Metoda | URL                | Opis                    |
+| ------ | ------------------ | ----------------------- |
+| GET    | `/api/oceny/`      | Pobierz listę ocen      |
+| POST   | `/api/oceny/`      | Dodaj nową ocenę        |
+| GET    | `/api/oceny/{id}/` | Pobierz szczegóły oceny |
+| PUT    | `/api/oceny/{id}/` | Zaktualizuj ocenę       |
+| DELETE | `/api/oceny/{id}/` | Usuń ocenę              |
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/ ` -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 5, \"data\": \"2025-11-20\", \"uczen_id\": 1, \"przedmiot\": \"Matematyka\"}'
-```
+### Filtrowanie
 
--   PUT (aktualizacja oceny)
+- `?uczen=<id>`: Filtruj po ID ucznia.
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 4, \"data\": \"2025-11-21\", \"uczen_id\": 1, \"przedmiot\": \"Matematyka\"}'
-```
+### Pola
 
--   DELETE (usunięcie oceny)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `wartosc`: Liczba dziesiętna (np. 4.50)
+- `waga`: Liczba całkowita (Domyślnie 1)
+- `opis`: Ciąg znaków (Opcjonalny opis)
+- `data_wystawienia`: Data i czas (Tylko do odczytu, generowane automatycznie)
+- `uczen`: Liczba całkowita (Klucz obcy do Ucznia)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu)
+- Flagi: `czy_punkty`, `czy_opisowa`, `czy_do_sredniej` (Wartości logiczne)
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/oceny/1/ `
-   -H "ADMIN-KEY: "
-```
+## Oceny Okresowe
 
-## `Oceny okresowe`
+Zarządzanie ocenami semestralnymi.
 
--   GET (lista ocen okresowych)
+**Endpoint**: `/api/oceny-okresowe/`
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/" `
-   -H "ADMIN-KEY: "
-```
+### Filtrowanie
 
--   GET (lista ocen okresowych dla konkretnego użytkownika)
+- `?uczen=<id>`: Filtruj po ID ucznia.
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/?user_id=1" `
-   -H "ADMIN-KEY: "
-```
+### Pola
 
--   GET (pojedyncza ocena okresowa)
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `uczen`: Liczba całkowita (Klucz obcy do Ucznia)
+- `wartosc`: Liczba dziesiętna
+- `okres`: Liczba całkowita (Numer semestru, np. 1 lub 2)
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu, Opcjonalne)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/1/ `
-   -H "ADMIN-KEY: "
-```
+## Oceny Końcowe
 
--   POST (utworzenie oceny okresowej)
+Zarządzanie ocenami rocznymi.
 
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 4, \"okres\": \"I\", \"uczen_id\": 1, \"przedmiot\": \"Fizyka\"}'
-```
+**Endpoint**: `/api/oceny-koncowe/`
 
--   PUT (aktualizacja oceny okresowej)
+### Filtrowanie
 
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 5, \"okres\": \"II\", \"uczen_id\": 1, \"przedmiot\": \"Fizyka\"}'
-```
+- `?uczen=<id>`: Filtruj po ID ucznia.
 
--   DELETE (usunięcie oceny okresowej)
+### Pola
 
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-okresowe/1/ `
-   -H "ADMIN-KEY: "
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `uczen`: Liczba całkowita (Klucz obcy do Ucznia)
+- `wartosc`: Liczba dziesiętna
+- `przedmiot`: Liczba całkowita (Klucz obcy do Przedmiotu)
+- `nauczyciel`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)
 
-## `Oceny końcowe`
+## Zachowanie (Punkty)
 
--   GET (lista ocen końcowych)
+Zarządzanie punktami z zachowania uczniów.
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/" `
-   -H "ADMIN-KEY: "
-```
+**Endpoint**: `/api/zachowanie-punkty/`
 
--   GET (lista ocen końcowych dla konkretnego użytkownika)
+### Filtrowanie
 
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/?user_id=1" `
-   -H "ADMIN-KEY: "
-```
+- `?uczen=<id>`: Filtruj po ID ucznia.
 
--   GET (pojedyncza ocena końcowa)
+### Pola
 
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (utworzenie oceny końcowej)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 5, \"rok_szkolny\": \"2024/2025\", \"uczen_id\": 1, \"przedmiot\": \"Historia\"}'
-```
-
--   PUT (aktualizacja oceny końcowej)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"wartosc\": 4, \"rok_szkolny\": \"2024/2025\", \"uczen_id\": 1, \"przedmiot\": \"Historia\"}'
-```
-
--   DELETE (usunięcie oceny końcowej)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/oceny-koncowe/1/ `
-   -H "ADMIN-KEY: "
-```
-
-## `Punkty z zachowania` — dodatkowa dokumentacja
-
--   GET (lista punktów z zachowania)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (lista punktów z zachowania dla ucznia, filtr user_id)
-
-```ps
-   curl.exe -X GET "http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/?user_id=1" `
-   -H "ADMIN-KEY: "
-```
-
--   GET (pojedynczy wpis)
-
-```ps
-   curl.exe -X GET http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/1/ `
-   -H "ADMIN-KEY: "
-```
-
--   POST (dodaj punkty)
-
-```ps
-   curl.exe -X POST http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"uczen_id\": 1, \"punkty\": 2, \"opis\": \"Dodatkowe za pomoc\", \"nauczyciel_wpisujacy_id\": 5}'
-```
-
--   PUT (aktualizacja wpisu)
-
-```ps
-   curl.exe -X PUT http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/1/ `  -H "ADMIN-KEY: " `
-   -H "Content-Type: application/json" `
-   -d '{\"punkty\": -1, \"opis\": \"Korekta\"}'
-```
-
--   DELETE (usuń wpis)
-
-```ps
-   curl.exe -X DELETE http://dziennik.polandcentral.cloudapp.azure.com/api/zachowanie-punkty/1/ `
-   -H "ADMIN-KEY: "
-```
+- `id`: Liczba całkowita (Tylko do odczytu)
+- `uczen`: Liczba całkowita (Klucz obcy do Ucznia)
+- `punkty`: Liczba całkowita (Punkty dodatnie lub ujemne)
+- `opis`: Ciąg znaków (Opis zdarzenia)
+- `data_wpisu`: Data i czas (Tylko do odczytu)
+- `nauczyciel_wpisujacy`: Liczba całkowita (Klucz obcy do Nauczyciela, Opcjonalne)

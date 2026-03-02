@@ -1,25 +1,24 @@
-from django.urls import path
-from .views import UczenApiView, NauczycielApiView, RodzicApiView, UserProfileApiView, WiadomoscApiView, KlasaApiView, AdresApiView
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+from .views import (
+    UczenViewSet,
+    NauczycielViewSet,
+    RodzicViewSet,
+    UserProfileViewSet,
+    KlasaViewSet,
+    AdresViewSet,
+    WiadomoscViewSet,
+)
+
+router = DefaultRouter()
+router.register(r"uczniowie", UczenViewSet)
+router.register(r"nauczyciele", NauczycielViewSet)
+router.register(r"rodzice", RodzicViewSet)
+router.register(r"profile", UserProfileViewSet)
+router.register(r"klasy", KlasaViewSet)
+router.register(r"adresy", AdresViewSet)
+router.register(r"wiadomosci", WiadomoscViewSet)
 
 urlpatterns = [
-    path("uczniowie/", UczenApiView.as_view(), name="uczen-list"),
-    path("uczniowie/<int:pk>/", UczenApiView.as_view(), name="uczen-detail"),
-    
-    path("nauczyciele/", NauczycielApiView.as_view(), name="nauczyciel-list"),
-    path("nauczyciele/<int:pk>/", NauczycielApiView.as_view(), name="nauczyciel-detail"),
-    
-    path("rodzice/", RodzicApiView.as_view(), name="rodzic-list"),
-    path("rodzice/<int:pk>/", RodzicApiView.as_view(), name="rodzic-detail"),
-    
-    path("userprofiles/", UserProfileApiView.as_view(), name="userprofile-list"),
-    path("userprofiles/<int:pk>/", UserProfileApiView.as_view(), name="userprofile-detail"),
-    
-    path("wiadomosci/", WiadomoscApiView.as_view(), name="wiadomosc-list"),
-    path("wiadomosci/<int:pk>/", WiadomoscApiView.as_view(), name="wiadomosc-detail"),
-    
-    path("klasy/", KlasaApiView.as_view(), name="klasa-list"),
-    path("klasy/<int:pk>/", KlasaApiView.as_view(), name="klasa-detail"),
-
-    path("adresy/", AdresApiView.as_view(), name="adres-list"),
-    path("adresy/<int:pk>/", AdresApiView.as_view(), name="adres-detail"),
+    path("", include(router.urls)),
 ]

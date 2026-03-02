@@ -1,22 +1,18 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
 from .views import (
-    OcenaApiView,
-    OcenaOkresowaApiView,
-    OcenaKoncowaApiView,
-    # zachowanie
-    ZachowaniePunktyApiView,
+    OcenaViewSet,
+    OcenaOkresowaViewSet,
+    OcenaKoncowaViewSet,
+    ZachowaniePunktyViewSet,
 )
 
-urlpatterns = [
-    path("oceny/", OcenaApiView.as_view(), name="ocena-list"),
-    path("oceny/<int:pk>/", OcenaApiView.as_view(), name="ocena-detail"),
+router = DefaultRouter()
+router.register(r"oceny", OcenaViewSet)
+router.register(r"oceny-okresowe", OcenaOkresowaViewSet)
+router.register(r"oceny-koncowe", OcenaKoncowaViewSet)
+router.register(r"zachowanie-punkty", ZachowaniePunktyViewSet)
 
-    path("oceny-okresowe/", OcenaOkresowaApiView.as_view(), name="ocena-okresowa-list"),
-    path("oceny-okresowe/<int:pk>/", OcenaOkresowaApiView.as_view(), name="ocena-okresowa-detail"),
-    
-    path("oceny-koncowe/", OcenaKoncowaApiView.as_view(), name="ocena-koncowa-list"),
-    path("oceny-koncowe/<int:pk>/", OcenaKoncowaApiView.as_view(), name="ocena-koncowa-detail"),
-    
-    path("zachowanie-punkty/", ZachowaniePunktyApiView.as_view(), name="zachowaniepunkty-list"),
-    path("zachowanie-punkty/<int:pk>/", ZachowaniePunktyApiView.as_view(), name="zachowaniepunkty-detail"),
+urlpatterns = [
+    path("", include(router.urls)),
 ]
