@@ -576,13 +576,23 @@ def create_zajecia_and_plans():
         plan, _ = PlanyZajec.objects.get_or_create(
             klasa=kl, ObowiazujeOdDnia=plan_start
         )
-        num_wpisow = random.randint(10, 25)
-        for _ in range(num_wpisow):
-            godz = random.choice(godziny)
-            dzien = random.choice(dni)
+
+        # Generate unique slots (day/hour) for this plan
+        possible_slots = []
+        for dzien_obj in dni:
+            for godz_obj in godziny:
+                possible_slots.append((dzien_obj, godz_obj))
+        
+        random.shuffle(possible_slots)
+        
+        # Determine number of lessons (e.g. 20-30 per week, max cap at total slots)
+        num_wpisow = random.randint(20, min(30, len(possible_slots)))
+        chosen_slots = possible_slots[:num_wpisow]
+
+        for d_obj, g_obj in chosen_slots:
             zaj = random.choice(zajecia_instances)
             wpis = PlanWpis.objects.create(
-                godzina_lekcyjna=godz, dzien_tygodnia=dzien, zajecia=zaj
+                godzina_lekcyjna=g_obj, dzien_tygodnia=d_obj, zajecia=zaj
             )
             plan.wpisy.add(wpis)
     print(

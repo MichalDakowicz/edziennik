@@ -7,6 +7,7 @@ const Timetable: React.FC = () => {
   const [data, setData] = useState<Record<string, string>>({});
   const [days, setDays] = useState<string[]>([]);
   const [hours, setHours] = useState<string[]>([]);
+  const [todayName, setTodayName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -59,6 +60,14 @@ const Timetable: React.FC = () => {
         // Sort Days by Numer
         const sortedDays = daysData.sort((a: any, b: any) => a.Numer - b.Numer);
         setDays(sortedDays.map((d: any) => d.Nazwa));
+
+        // Identify Today
+        const jsDay = new Date().getDay(); 
+        const dbDayNum = jsDay === 0 ? 7 : jsDay;
+        const todayObj = sortedDays.find((d: any) => d.Numer === dbDayNum);
+        if (todayObj) {
+            setTodayName(todayObj.Nazwa);
+        }
 
         // Sort Hours by Numer
         const sortedHours = hoursData.sort((a: any, b: any) => a.Numer - b.Numer);
@@ -128,7 +137,10 @@ const Timetable: React.FC = () => {
             <tr>
               <th className="px-4 py-3 font-medium border-r border-zinc-800/50 w-24">Godzina</th>
               {days.map(day => (
-                <th key={day} className="px-4 py-3 font-medium border-r border-zinc-800/50 text-center last:border-0">{day}</th>
+                <th key={day} className={`px-4 py-3 font-medium border-r border-zinc-800/50 text-center last:border-0 ${day === todayName ? 'bg-blue-900/20 text-blue-200 ring-inset ring-2 ring-blue-500/20' : ''}`}>
+                    {day}
+                    {day === todayName && <span className="block text-[9px] text-blue-400 mt-0.5 normal-case font-normal">(Dzisiaj)</span>}
+                </th>
               ))}
             </tr>
           </thead>
@@ -145,10 +157,11 @@ const Timetable: React.FC = () => {
                 </td>
                 {days.map(day => {
                   const subject = data[`${day}-${index}`];
+                  const isToday = day === todayName;
                   return (
-                    <td key={day} className="px-2 py-2 text-center border-r border-zinc-800/50 last:border-0 align-top relative">
+                    <td key={day} className={`px-2 py-2 text-center border-r border-zinc-800/50 last:border-0 align-top relative ${isToday ? 'bg-blue-900/5' : ''}`}>
                       {subject ? (
-                        <div className="p-2 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20 font-medium text-xs shadow-sm group-hover:bg-blue-500/20 transition-colors h-full flex items-center justify-center">
+                        <div className={`p-2 rounded font-medium text-xs shadow-sm transition-colors h-full flex items-center justify-center ${isToday ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40' : 'bg-blue-500/10 text-blue-300 border border-blue-500/20 group-hover:bg-blue-500/20'}`}>
                           {subject}
                         </div>
                       ) : (
