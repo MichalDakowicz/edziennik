@@ -23,6 +23,13 @@ class PlanyZajecViewSet(viewsets.ModelViewSet):
     serializer_class = PlanyZajecSerializer
     permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        klasa_id = self.request.query_params.get("klasa_id")
+        if klasa_id:
+            queryset = queryset.filter(klasa_id=klasa_id)
+        return queryset
+
 
 class GodzinyLekcyjneViewSet(viewsets.ModelViewSet):
     queryset = GodzinyLekcyjne.objects.all()
@@ -46,6 +53,18 @@ class PlanWpisViewSet(viewsets.ModelViewSet):
     queryset = PlanWpis.objects.all()
     serializer_class = PlanWpisSerializer
     permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        plan_id = self.request.query_params.get("plan_id")
+        if plan_id:
+            # Filter wpisy that belong to a specific plan
+            try:
+                plan = PlanyZajec.objects.get(id=plan_id)
+                return plan.wpisy.all()
+            except PlanyZajec.DoesNotExist:
+                return PlanWpis.objects.none()
+        return queryset
 
 
 class WydarzenieViewSet(viewsets.ModelViewSet):

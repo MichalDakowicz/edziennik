@@ -36,7 +36,6 @@ ALLOWED_HOSTS = config(
 # Application definition
 
 INSTALLED_APPS = [
-    
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -86,7 +85,7 @@ WSGI_APPLICATION = "edziennik.wsgi.application"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "authentication.api.custom_auth.CustomJWTAuthentication",
     ),
 }
 
@@ -209,7 +208,8 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", cast=bool)
 
 import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 
 # Minimal Jazzmin configuration. You can customize colors, logos and UI
@@ -221,4 +221,4 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Edziennik",
 }
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
