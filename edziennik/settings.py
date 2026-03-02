@@ -204,6 +204,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:19006",
 ]
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-authorization",
+]
+
 # For development, you can use CORS_ALLOW_ALL_ORIGINS instead (not recommended for production)
 CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", cast=bool)
 
