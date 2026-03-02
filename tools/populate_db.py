@@ -39,7 +39,7 @@ from django.db import transaction
 User = get_user_model()
 
 # Project models (adapted to this repo)
-from users.models import Klasa, Nauczyciel, Uczen, Adres, Rodzic
+from users.models import Klasa, Nauczyciel, Uczen, Adres, Rodzic, Wiadomosc
 from utils.models import Przedmiot
 from grades.models import Ocena, OcenaOkresowa, OcenaKoncowa, ZachowaniePunkty
 from attendance.models import Frekwencja, StatusyObecnosci
@@ -582,9 +582,9 @@ def create_zajecia_and_plans():
         for dzien_obj in dni:
             for godz_obj in godziny:
                 possible_slots.append((dzien_obj, godz_obj))
-        
+
         random.shuffle(possible_slots)
-        
+
         # Determine number of lessons (e.g. 20-30 per week, max cap at total slots)
         num_wpisow = random.randint(20, min(30, len(possible_slots)))
         chosen_slots = possible_slots[:num_wpisow]
@@ -703,6 +703,51 @@ def create_rodzice_for_uczniowie(sample_fraction=0.15):
     print(f"  Created {rodzice_created} rodzice and linked them to uczniowie")
 
 
+@transaction.atomic
+def create_wiadomosci():
+    print("Populating Wiadomosci (messages)...")
+    users = list(User.objects.filter(is_active=True))
+    if len(users) < 2:
+        print("  Not enough users to create messages. Skipping.")
+        return
+
+    messages_created = 0
+    # Create ~5 messages per user on average
+    limit = len(users) * 5
+
+    # We'll create list of messages to bulk_create?
+    # No, auto_now_add makes bulk_create slightly tricky if we want specific dates.
+    # But for messages, random past dates are fine.
+
+    # Let's iterate a number of times
+    for _ in range(limit):
+        sender = random.choice(users)
+        recipient = random.choice(users)
+        while recipient == sender:
+            recipient = random.choice(users)
+
+        topic = fake.sentence(nb_words=4)
+        body = fake.text()
+        msg = Wiadomosc.objects.create(
+            nadawca=sender,
+            odbiorca=recipient,
+            temat=topic,
+            tresc=body,
+            przeczytana=random.choice([True, False]),
+        )
+        # Override date to be in the past
+        past_date = timezone.now() - timedelta(
+            days=random.randint(0, 60), hours=random.randint(0, 23)
+        )
+        # Since auto_now_add is set, we need to update it via filter().update() or similar to bypass auto_now_add logic immediately?
+        # Actually, for auto_now_add, it sets value on creation.
+        # If we use `Message.objects.filter(pk=msg.pk).update(data_wyslania=past_date)`, it works.
+        Wiadomosc.objects.filter(pk=msg.pk).update(data_wyslania=past_date)
+        messages_created += 1
+
+    print(f"  Created {messages_created} wiadomosci")
+
+
 if __name__ == "__main__":
     print("Starting data population process...")
 
@@ -710,10 +755,22 @@ if __name__ == "__main__":
     Ocena.objects.all().delete()
     Frekwencja.objects.all().delete()
     ZachowaniePunkty.objects.all().delete()
+    Wiadomosc.objects.all().delete()
     Uczen.objects.all().delete()
     Nauczyciel.objects.all().delete()
     # Remove non-superuser accounts created by prior runs
     User.objects.filter(is_superuser=False).delete()
+
+    # Also clear timetables completely to avoid duplication
+    PlanWpis.objects.all().delete()
+    PlanyZajec.objects.all().delete()
+    Zajecia.objects.all().delete()
+    GodzinyLekcyjne.objects.all().delete()
+    DniTygodnia.objects.all().delete()
+    Wydarzenie.objects.all().delete()
+    Temat.objects.all().delete()
+    PracaDomowa.objects.all().delete()
+
     Przedmiot.objects.all().delete()
     Klasa.objects.all().delete()
 
@@ -732,5 +789,6 @@ if __name__ == "__main__":
     create_zajecia_and_plans()
     create_wydarzenia_tematy_prace()
     create_rodzice_for_uczniowie()
+    create_wiadomosci()
 
     print("Data population process finished.")
