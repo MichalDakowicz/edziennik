@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login.tsx';
-import Layout from './components/Layout.tsx';
-import DashboardHome from './components/DashboardHome.tsx';
-import Grades from './components/Grades.tsx';
-import Attendance from './components/Attendance.tsx';
-import Timetable from './components/Timetable.tsx';
+import Login from './components/Login';
+import Layout from './components/Layout';
+import DashboardHome from './components/DashboardHome';
+import Grades from './components/Grades';
+import Attendance from './components/Attendance';
+import Timetable from './components/Timetable';
 
 function App() {
   return (

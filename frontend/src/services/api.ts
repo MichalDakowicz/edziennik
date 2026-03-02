@@ -1,6 +1,6 @@
 import { getAuthToken, refreshAccessToken, logout } from './auth';
 
-const API_BASE_URL = 'http://dziennik.polandcentral.cloudapp.azure.com/api';
+const API_BASE_URL = '/api';
 
 // --- Interfaces ---
 
@@ -53,9 +53,19 @@ export interface LessonHour {
 
 export interface TimetableEntry {
     id: number;
-    DzienTygodnia: number; // ID
+    dzien_tygodnia: number; // ID (Model field is snake_case)
     godzina_lekcyjna: number; // ID
     zajecia: number; // ID for Zajecia model
+}
+
+export interface Message {
+    id: number;
+    nadawca: number;
+    odbiorca: number;
+    temat: string;
+    tresc: string;
+    data_wyslania: string;
+    przeczytana: boolean;
 }
 
 export interface Zajecia {
@@ -87,6 +97,8 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     let response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: makeHeaders(token),
+        // Ensure credentials (cookies) are included if needed, though JWT is header-based
+        // mode: 'cors', // default
     });
 
     if (!response.ok) {
@@ -149,13 +161,16 @@ export const getTimetablePlan = async (classId: number): Promise<TimetablePlan[]
     return fetchWithAuth(`/plany-zajec/?klasa_id=${classId}`);
 };
 
+export const getZajecia = async (): Promise<Zajecia[]> => {
+    return fetchWithAuth('/zajecia/');
+};
+
 export const getTimetableEntries = async (planId: number): Promise<TimetableEntry[]> => {
-    // Requires backend filter modification (done previously)
     return fetchWithAuth(`/plan-wpisy/?plan_id=${planId}`);
 };
 
-export const getZajecia = async (): Promise<Zajecia[]> => {
-    return fetchWithAuth('/zajecia/');
+export const getMessages = async (userId: number): Promise<Message[]> => {
+    return fetchWithAuth(`/wiadomosci/?odbiorca=${userId}`);
 };
 
 export const getDaysOfWeek = async (): Promise<{id: number, Nazwa: string, Numer: number}[]> => {

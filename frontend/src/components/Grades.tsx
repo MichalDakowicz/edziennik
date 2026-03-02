@@ -1,7 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { getGrades, getSubjects, Grade, Subject } from '../services/api';
+import { getGrades, getSubjects, Grade } from '../services/api';
 import { getCurrentUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+
+const formatGradeValue = (value: string | number) => {
+    const val = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(val)) return value;
+
+    if (val % 1 === 0.5) {
+        return `${Math.floor(val)}+`;
+    }
+    if (val % 1 === 0.75) {
+        return `${Math.ceil(val)}-`;
+    }
+    return val.toString();
+};
+
+const getGradeColor = (value: string | number) => {
+    const val = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(val)) return 'bg-zinc-900 border-zinc-800 text-zinc-100';
+    
+    if (val >= 5) return 'bg-emerald-900/20 text-emerald-400 border-emerald-900/30';
+    if (val >= 4) return 'bg-green-900/20 text-green-400 border-green-900/30';
+    if (val >= 3) return 'bg-yellow-900/20 text-yellow-400 border-yellow-900/30';
+    if (val >= 2) return 'bg-orange-900/20 text-orange-400 border-orange-900/30';
+    return 'bg-red-900/20 text-red-400 border-red-900/30';
+};
 
 const Grades: React.FC = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -40,18 +64,18 @@ const Grades: React.FC = () => {
     fetchData();
   }, [navigate]);
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading grades...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (loading) return <div className="p-8 text-center text-zinc-500">Ładowanie ocen...</div>;
+  if (error) return <div className="p-8 text-center text-red-400">{error}</div>;
 
   // Group by subject
   const subjectIds = Array.from(new Set(grades.map(g => g.przedmiot)));
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Grades</h2>
+      <h2 className="text-3xl font-bold mb-8 text-zinc-100 tracking-tight">Oceny</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {subjectIds.map(subjectId => {
-          const subjectName = subjectsMap.get(subjectId) || `Subject ${subjectId}`;
+          const subjectName = subjectsMap.get(subjectId) || `Przedmiot ${subjectId}`;
           const subjectGrades = grades.filter(g => g.przedmiot === subjectId);
           
           const numericGrades = subjectGrades.map(g => ({ val: parseFloat(g.wartosc), weight: g.waga })).filter(g => !isNaN(g.val));
@@ -60,22 +84,22 @@ const Grades: React.FC = () => {
             : 0;
 
           return (
-            <div key={subjectId} className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">{subjectName}</h3>
-                <span className={`px-3 py-1 rounded-full text-sm font-bold ${average >= 4 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                  Avg: {average.toFixed(2)}
+            <div key={subjectId} className="bg-zinc-900/50 rounded-xl border border-zinc-800 p-6 hover:border-zinc-700 transition duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-zinc-200 tracking-tight">{subjectName}</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${average >= 4 ? 'bg-green-900/20 text-green-400 border-green-900/30' : 'bg-yellow-900/20 text-yellow-400 border-yellow-900/30'}`}>
+                  Śr: {average.toFixed(2)}
                 </span>
               </div>
               <div className="space-y-3">
                 {subjectGrades.map(grade => (
-                  <div key={grade.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                  <div key={grade.id} className="flex justify-between items-center p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg group hover:border-zinc-700 transition-colors">
                     <div className="flex flex-col">
-                      <span className="font-medium text-gray-800">{grade.opis || 'Grade'}</span>
-                      <span className="text-xs text-gray-500">{new Date(grade.data_wystawienia).toLocaleDateString()} • Weight: {grade.waga}</span>
+                      <span className="font-medium text-zinc-300 text-sm">{grade.opis || 'Ocena'}</span>
+                      <span className="text-xs text-zinc-500">{new Date(grade.data_wystawienia).toLocaleDateString()} • Waga: {grade.waga}</span>
                     </div>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">
-                      {grade.wartosc}
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg border font-bold text-sm transition-colors ${getGradeColor(grade.wartosc)}`}>
+                      {formatGradeValue(grade.wartosc)}
                     </div>
                   </div>
                 ))}

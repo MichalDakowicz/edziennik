@@ -52,3 +52,10 @@ class WiadomoscViewSet(viewsets.ModelViewSet):
     queryset = Wiadomosc.objects.all()
     serializer_class = WiadomoscSerializer
     permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        odbiorca_id = self.request.query_params.get("odbiorca")
+        if odbiorca_id:
+            queryset = queryset.filter(odbiorca_id=odbiorca_id)
+        return queryset
