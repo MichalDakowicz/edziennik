@@ -3,7 +3,7 @@ import json
 import datetime
 import base64
 
-BASE_URL = "http://dziennik.polandcentral.cloudapp.azure.com/api"
+BASE_URL = "https://dziennik.polandcentral.cloudapp.azure.com/api"
 USERNAME = "sebastian_cierpka"
 PASSWORD = "password123"
 

@@ -31,6 +31,12 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config(
     "ALLOWED-HOSTS", default="", cast=lambda v: [s.strip() for s in v.split(",")]
 )
+if "dziennik.polandcentral.cloudapp.azure.com" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("dziennik.polandcentral.cloudapp.azure.com")
+
+CSRF_TRUSTED_ORIGINS = ["https://dziennik.polandcentral.cloudapp.azure.com"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 
 # Application definition
@@ -202,6 +208,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8081",
     "http://localhost:19006",
     "http://127.0.0.1:19006",
+    "https://dziennik.polandcentral.cloudapp.azure.com",
 ]
 
 from corsheaders.defaults import default_headers

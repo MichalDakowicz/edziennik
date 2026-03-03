@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://dziennik.polandcentral.cloudapp.azure.com',
+        target: 'https://dziennik.polandcentral.cloudapp.azure.com',
         changeOrigin: true,
         secure: false,      
       }

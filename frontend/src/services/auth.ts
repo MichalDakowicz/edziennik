@@ -13,7 +13,7 @@ export interface TokenPayload {
   exp: number;
 }
 
-const API_BASE_URL = 'http://dziennik.polandcentral.cloudapp.azure.com/api';
+const API_BASE_URL = 'https://dziennik.polandcentral.cloudapp.azure.com/api';
 
 export const login = async (username: string, password: string): Promise<string | null> => {
   try {
