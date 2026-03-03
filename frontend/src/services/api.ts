@@ -1,6 +1,6 @@
 import { getAuthToken, refreshAccessToken, logout } from './auth';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://dziennik.polandcentral.cloudapp.azure.com/api';
 
 // --- Interfaces ---
 
