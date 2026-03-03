@@ -4,6 +4,7 @@ from grades.api.urls import router as grades_router
 from timetables.api.urls import router as timetables_router
 from attendance.api.urls import router as attendance_router
 from utils.api.urls import router as utils_router
+from utils.api.lucky_number import LuckyNumberView
 from django.urls import path, include
 
 router = routers.DefaultRouter()
@@ -16,4 +17,5 @@ router.registry.extend(utils_router.registry)
 urlpatterns = [
     path("", include(router.urls)),
     path("auth/", include("authentication.api.urls")),
+    path("lucky-number/", LuckyNumberView.as_view(), name="lucky-number"),
 ]
