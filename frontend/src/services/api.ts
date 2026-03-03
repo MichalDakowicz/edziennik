@@ -12,8 +12,7 @@ export interface Subject {
 
 export interface Teacher {
     id: number;
-    user: number; // User ID
-    // Add filtering for name display if needed, but usually we just need ID
+    user: number | { id: number; username?: string; first_name?: string; last_name?: string; email?: string };
 }
 
 export interface Grade {
@@ -170,9 +169,21 @@ export const getTimetableEntries = async (planId: number): Promise<TimetableEntr
 };
 
 export const getMessages = async (userId: number): Promise<Message[]> => {
+    if (!userId) {
+        console.warn('getMessages called with undefined userId');
+        return [];
+    }
     return fetchWithAuth(`/wiadomosci/?odbiorca=${userId}`);
 };
 
 export const getDaysOfWeek = async (): Promise<{id: number, Nazwa: string, Numer: number}[]> => {
     return fetchWithAuth('/dni-tygodnia/');
+};
+
+export const getTeachers = async (): Promise<Teacher[]> => {
+    return fetchWithAuth('/nauczyciele/');
+};
+
+export const getUserProfile = async (userId: number): Promise<{id: number, first_name: string, last_name: string, username: string}> => {
+    return fetchWithAuth(`/users/${userId}/`);
 };

@@ -12,6 +12,15 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
 
+class UserDisplaySerializer(serializers.ModelSerializer):
+    """Read-only serializer for looking up user display info by id (e.g. message senders)."""
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name"]
+        read_only_fields = fields
+
+
 class AdresSerializer(serializers.ModelSerializer):
     class Meta:
         model = Adres

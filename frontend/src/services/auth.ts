@@ -124,7 +124,26 @@ export const getAuthToken = () => {
 
 export const getCurrentUser = () => {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+    
+    const user = JSON.parse(userStr);
+    
+    // If user object is missing id field, try to get it from the current token
+    if (!user.id) {
+        const token = getAuthToken();
+        if (token) {
+            try {
+                const decoded: TokenPayload = jwtDecode(token);
+                user.id = decoded.user_id;
+                // Update localStorage with the corrected user object
+                localStorage.setItem('user', JSON.stringify(user));
+            } catch (e) {
+                console.warn('Could not decode token to get user_id:', e);
+            }
+        }
+    }
+    
+    return user;
 }
 
 export const isAuthenticated = () => {

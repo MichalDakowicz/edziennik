@@ -4,7 +4,7 @@ import { getCurrentUser } from '../services/auth';
 import { 
     getGrades, getAttendance, getSubjects, getTimetablePlan, 
     getTimetableEntries, getLessonHours, getDaysOfWeek, getZajecia, 
-    getAttendanceStatuses, getMessages,
+    getAttendanceStatuses, getMessages, getTeachers, getUserProfile,
     Grade, Message
 } from '../services/api';
 
@@ -15,7 +15,7 @@ interface DashboardData {
     attendanceRate: number;
     nextLesson: { subject: string; time: string; room?: string } | null;
     todayPlan: { time: string; subject: string; originalIndex: number }[];
-    recentMessages: Message[];
+    recentMessages: (Message & { senderName: string })[];
 }
 
 const formatGradeValue = (value: string | number) => {
@@ -79,9 +79,38 @@ const DashboardHome: React.FC = () => {
                     getMessages(currentUser.id) // Use currentUser.id (User PK) not studentId
                 ]);
 
+                // Build sender names: first from teachers list, then fill missing via GET /users/<id>/
+                const userMap = new Map<number, string>();
+                try {
+                    const teachers = await getTeachers();
+                    for (const t of teachers) {
+                        const u = t.user;
+                        if (u && typeof u === 'object' && 'id' in u) {
+                            const name = [u.first_name, u.last_name].filter(Boolean).join(' ').trim();
+                            userMap.set(u.id, name || (u.username as string) || `Użytkownik ${u.id}`);
+                        }
+                    }
+                    const senderIds = [...new Set(messages.map(msg => msg.nadawca))];
+                    for (const senderId of senderIds) {
+                        if (userMap.has(senderId)) continue;
+                        try {
+                            const profile = await getUserProfile(senderId);
+                            const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim();
+                            userMap.set(senderId, name || profile.username || `Użytkownik ${senderId}`);
+                        } catch {
+                            userMap.set(senderId, `Użytkownik ${senderId}`);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch user information for senders:', e);
+                }
+
                 // 2. Process Subjects Map
                 const subjectMap = new Map<number, string>();
                 subjects.forEach((s: any) => subjectMap.set(s.id, s.nazwa || s.Nazwa));
+
+                // Process Users Map for message senders
+                // userMap is already populated above
 
                 // 3. Process Grades (Recent & Avg)
                 const sortedGrades = grades.sort((a,b) => new Date(b.data_wystawienia).getTime() - new Date(a.data_wystawienia).getTime());
@@ -165,7 +194,10 @@ const DashboardHome: React.FC = () => {
                     averageGrade,
                     attendanceRate,
                     nextLesson,
-                    recentMessages: messages.slice(0, 3),
+                    recentMessages: messages.slice(0, 3).map(msg => ({
+                        ...msg,
+                        senderName: userMap.get(msg.nadawca) || `Użytkownik ${msg.nadawca}`
+                    })),
                     todayPlan
                 });
 
@@ -302,8 +334,7 @@ const DashboardHome: React.FC = () => {
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <p className="font-semibold text-zinc-200 text-sm">{msg.temat}</p>
-                                        {/* You might want to resolve sender name here if possible, for now static or ID */}
-                                        <span className="text-[10px] text-zinc-600 border border-zinc-800 px-1.5 rounded">Od: {msg.nadawca}</span>
+                                        <span className="text-[10px] text-zinc-600 border border-zinc-800 px-1.5 rounded">Od: {msg.senderName}</span>
                                     </div>
                                     <p className="text-zinc-400 text-sm line-clamp-2">{msg.tresc}</p>
                                     <p className="text-xs text-zinc-600 mt-2">{new Date(msg.data_wyslania).toLocaleString()}</p>

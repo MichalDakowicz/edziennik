@@ -1,15 +1,21 @@
-from rest_framework import viewsets, permissions
+from django.contrib.auth import get_user_model
+from rest_framework import viewsets, permissions, mixins
+from rest_framework.response import Response
+
 from ..models import Uczen, Nauczyciel, Rodzic, UserProfile, Klasa, Adres, Wiadomosc
 from .serializers import (
     UczenSerializer,
     NauczycielSerializer,
     RodzicSerializer,
     UserProfileSerializer,
+    UserDisplaySerializer,
     KlasaSerializer,
     AdresSerializer,
     WiadomoscSerializer,
 )
 from authentication.api.permissions import IsAdminKeyAuthenticated
+
+User = get_user_model()
 
 
 class UczenViewSet(viewsets.ModelViewSet):
@@ -34,6 +40,19 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
+
+
+class UserViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    Read-only lookup of user display info by user id (e.g. for message sender names).
+    Only GET /users/<id>/ is allowed; list is disabled.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserDisplaySerializer
+    permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        return Response({"detail": "Method not allowed."}, status=405)
 
 
 class KlasaViewSet(viewsets.ModelViewSet):

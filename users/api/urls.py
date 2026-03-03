@@ -5,6 +5,7 @@ from .views import (
     NauczycielViewSet,
     RodzicViewSet,
     UserProfileViewSet,
+    UserViewSet,
     KlasaViewSet,
     AdresViewSet,
     WiadomoscViewSet,
@@ -15,6 +16,7 @@ router.register(r"uczniowie", UczenViewSet)
 router.register(r"nauczyciele", NauczycielViewSet)
 router.register(r"rodzice", RodzicViewSet)
 router.register(r"profile", UserProfileViewSet)
+router.register(r"users", UserViewSet)
 router.register(r"klasy", KlasaViewSet)
 router.register(r"adresy", AdresViewSet)
 router.register(r"wiadomosci", WiadomoscViewSet)
