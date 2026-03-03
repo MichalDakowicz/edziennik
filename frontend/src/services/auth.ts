@@ -2,6 +2,7 @@
 import { jwtDecode } from 'jwt-decode';
 
 export interface TokenPayload {
+  user_id: number;
   username: string;
   email: string;
   first_name: string;
@@ -47,6 +48,7 @@ export const login = async (username: string, password: string): Promise<string 
     
     // Store user info
     localStorage.setItem('user', JSON.stringify({
+        id: decoded.user_id,
         firstName: decoded.first_name,
         lastName: decoded.last_name,
         email: decoded.email,
