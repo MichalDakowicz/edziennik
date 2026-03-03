@@ -4,7 +4,7 @@ import datetime
 import base64
 
 BASE_URL = "https://dziennik.polandcentral.cloudapp.azure.com/api"
-USERNAME = "sebastian_cierpka"
+USERNAME = "wojciech_dzwonnik"
 PASSWORD = "password123"
 
 
