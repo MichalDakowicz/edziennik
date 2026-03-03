@@ -71,3 +71,13 @@ class WydarzenieViewSet(viewsets.ModelViewSet):
     queryset = Wydarzenie.objects.all()
     serializer_class = WydarzenieSerializer
     permission_classes = [permissions.IsAuthenticated | IsAdminKeyAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        klasa_id = self.request.query_params.get("klasa")
+        przedmiot_id = self.request.query_params.get("przedmiot")
+        if klasa_id:
+            queryset = queryset.filter(klasa_id=klasa_id)
+        if przedmiot_id:
+            queryset = queryset.filter(przedmiot_id=przedmiot_id)
+        return queryset

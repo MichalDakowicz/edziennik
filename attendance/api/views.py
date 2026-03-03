@@ -22,11 +22,17 @@ class FrekwencjaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        uczen_id = self.request.query_params.get("uczen_id")
-        date = self.request.query_params.get("date")
+        uczen_id = (
+            self.request.query_params.get("uczen_id")
+            or self.request.query_params.get("uczen")
+        )
+        date_from = self.request.query_params.get("date_from")
+        date_to = self.request.query_params.get("date_to")
 
         if uczen_id:
             queryset = queryset.filter(uczen_id=uczen_id)
-        if date:
-            queryset = queryset.filter(Data=date)
+        if date_from:
+            queryset = queryset.filter(Data__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(Data__lte=date_to)
         return queryset

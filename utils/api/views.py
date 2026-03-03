@@ -28,16 +28,13 @@ class PracaDomowaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        klasa_id = self.request.query_params.get("klasa_id")
-        przedmiot_id = self.request.query_params.get("przedmiot_id")
-        nauczyciel_id = self.request.query_params.get("nauczyciel_id")
+        klasa_id = self.request.query_params.get("klasa")
+        przedmiot_id = self.request.query_params.get("przedmiot")
 
         if klasa_id:
             queryset = queryset.filter(klasa_id=klasa_id)
         if przedmiot_id:
             queryset = queryset.filter(przedmiot_id=przedmiot_id)
-        if nauczyciel_id:
-            queryset = queryset.filter(nauczyciel_id=nauczyciel_id)
         return queryset
 
 

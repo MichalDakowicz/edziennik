@@ -75,6 +75,9 @@ class WiadomoscViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         odbiorca_id = self.request.query_params.get("odbiorca")
+        nadawca_id = self.request.query_params.get("nadawca")
         if odbiorca_id:
             queryset = queryset.filter(odbiorca_id=odbiorca_id)
+        if nadawca_id:
+            queryset = queryset.filter(nadawca_id=nadawca_id)
         return queryset
