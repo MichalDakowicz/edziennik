@@ -5,6 +5,7 @@ import {
     getGrades, getAttendance, getSubjects, getTimetablePlan, 
     getTimetableEntries, getLessonHours, getDaysOfWeek, getZajecia, 
     getAttendanceStatuses, getMessages, getTeachers, getUserProfile,
+    patchMessage,
     Grade, Message
 } from '../services/api';
 
@@ -12,10 +13,11 @@ interface DashboardData {
     user: any;
     recentGrades: (Grade & { subjectName: string })[];
     averageGrade: number;
-    attendanceRate: number;
+    attendanceRate: number | null;
     nextLesson: { subject: string; time: string; room?: string } | null;
     todayPlan: { time: string; subject: string; originalIndex: number }[];
     recentMessages: (Message & { senderName: string })[];
+    unreadMessageCount: number;
 }
 
 const formatGradeValue = (value: string | number) => {
@@ -42,10 +44,35 @@ const getGradeColor = (value: string | number) => {
     return 'bg-red-900/20 text-red-400 border-red-900/30';
 };
 
+type MessageWithSender = Message & { senderName: string };
+type GradeWithSubject = Grade & { subjectName: string };
+
 const DashboardHome: React.FC = () => {
     const navigate = useNavigate();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [gradeModal, setGradeModal] = useState<GradeWithSubject | null>(null);
+    const [messageModal, setMessageModal] = useState<MessageWithSender | null>(null);
+
+    const openMessage = async (msg: MessageWithSender) => {
+        setMessageModal(msg);
+        if (!msg.przeczytana) {
+            try {
+                await patchMessage(msg.id, { przeczytana: true });
+                const updated = { ...msg, przeczytana: true };
+                setMessageModal(updated);
+                setData(prev => prev ? {
+                    ...prev,
+                    recentMessages: prev.recentMessages.map(m =>
+                        m.id === msg.id ? updated : m
+                    ),
+                    unreadMessageCount: Math.max(0, (prev.unreadMessageCount ?? 0) - 1)
+                } : null);
+            } catch (e) {
+                console.warn('Nie udało się oznaczyć wiadomości jako przeczytanej', e);
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -127,13 +154,15 @@ const DashboardHome: React.FC = () => {
                     ? numericGrades.reduce((sum, g) => sum + g.val * g.weight, 0) / numericGrades.reduce((sum, g) => sum + g.weight, 0)
                     : 0;
 
-                // 4. Process Attendance
+                // 4. Process Attendance (obecność, spóźnienie, zwolnienie = „obecny”, bez danych = null)
                 const statusMap = new Map<number, string>();
-                statuses.forEach(s => statusMap.set(s.id, s.Wartosc));
-                
-                const isPresent = (status: string) => status.toLowerCase().includes('obecn') || status.toLowerCase().includes('spóźn');
-                const presentCount = attendance.filter(a => isPresent(statusMap.get(a.status) || '')).length;
-                const attendanceRate = attendance.length > 0 ? (presentCount / attendance.length) * 100 : 100;
+                statuses.forEach((s: any) => statusMap.set(s.id, s.Wartosc));
+                const isPresent = (status: string) => {
+                    const t = status.toLowerCase();
+                    return t.includes('obecn') || t.includes('spóźn') || t.includes('spozn') || t.includes('zwoln');
+                };
+                const presentCount = attendance.filter(a => isPresent(statusMap.get(Number(a.status)) ?? '')).length;
+                const attendanceRate = attendance.length > 0 ? (presentCount / attendance.length) * 100 : null;
 
                 // 5. Process Timetable (Today's Plan & Next Lesson)
                 let todayPlan: { time: string; subject: string; originalIndex: number }[] = [];
@@ -194,11 +223,18 @@ const DashboardHome: React.FC = () => {
                     averageGrade,
                     attendanceRate,
                     nextLesson,
-                    recentMessages: messages.slice(0, 3).map(msg => ({
-                        ...msg,
-                        senderName: userMap.get(msg.nadawca) || `Użytkownik ${msg.nadawca}`
-                    })),
-                    todayPlan
+                    recentMessages: [...messages]
+                        .sort((a, b) => {
+                            if (a.przeczytana !== b.przeczytana) return a.przeczytana ? 1 : -1;
+                            return new Date(b.data_wyslania).getTime() - new Date(a.data_wyslania).getTime();
+                        })
+                        .slice(0, 3)
+                        .map(msg => ({
+                            ...msg,
+                            senderName: userMap.get(msg.nadawca) || `Użytkownik ${msg.nadawca}`
+                        })),
+                    todayPlan,
+                    unreadMessageCount: messages.filter(m => !m.przeczytana).length
                 });
 
             } catch (e) {
@@ -235,8 +271,14 @@ const DashboardHome: React.FC = () => {
                 </div>
                 <div onClick={() => navigate('/dashboard/attendance')} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 cursor-pointer hover:border-zinc-700 transition group">
                     <div className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">Frekwencja</div>
-                    <div className={`text-2xl font-bold transition-colors ${data?.attendanceRate && data.attendanceRate < 80 ? 'text-red-400' : 'text-zinc-100 group-hover:text-green-400'}`}>
-                        {data?.attendanceRate?.toFixed(1)}%
+                    <div className={`text-2xl font-bold ${(typeof data?.attendanceRate === 'number')
+                        ? data.attendanceRate >= 80
+                            ? 'text-green-400'
+                            : data.attendanceRate >= 50
+                                ? 'text-amber-400'
+                                : 'text-red-400'
+                        : 'text-zinc-100'}`}>
+                        {typeof data?.attendanceRate === 'number' ? `${data.attendanceRate.toFixed(1)}%` : '-'}
                     </div>
                 </div>
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
@@ -246,9 +288,9 @@ const DashboardHome: React.FC = () => {
                     </div>
                     {data?.nextLesson && <div className="text-xs text-zinc-500 mt-1">{data.nextLesson.time}</div>}
                 </div>
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                <div onClick={() => navigate('/dashboard/messages')} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 cursor-pointer hover:border-zinc-700 transition group">
                     <div className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">Nowe wiadomości</div>
-                    <div className="text-2xl font-bold text-zinc-100">1</div>
+                    <div className="text-2xl font-bold text-zinc-100 group-hover:text-blue-400 transition-colors">{data?.unreadMessageCount ?? 0}</div>
                 </div>
             </div>
 
@@ -293,13 +335,17 @@ const DashboardHome: React.FC = () => {
                                 <tr>
                                     <th className="px-6 py-3 font-medium">Przedmiot</th>
                                     <th className="px-6 py-3 font-medium">Ocena</th>
-                                    <th className="px-6 py-3 font-medium hidden sm:table-cell">Kategoria</th>
+                                    <th className="px-6 py-3 font-medium">Kategoria</th>
                                     <th className="px-6 py-3 font-medium hidden sm:table-cell">Data</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800/50">
                                 {data?.recentGrades.map((grade) => (
-                                    <tr key={grade.id} className="hover:bg-zinc-900/30 transition-colors">
+                                    <tr
+                                        key={grade.id}
+                                        onClick={() => setGradeModal(grade)}
+                                        className="hover:bg-zinc-900/30 transition-colors cursor-pointer"
+                                    >
                                         <td className="px-6 py-4 font-medium text-zinc-300">
                                             {grade.subjectName}
                                         </td>
@@ -308,8 +354,9 @@ const DashboardHome: React.FC = () => {
                                                 {formatGradeValue(grade.wartosc)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-xs text-zinc-500 hidden sm:table-cell">
-                                            {grade.opis || 'Ocena cząstkowa'} <span className="opacity-50">• Waga: {grade.waga}</span>
+                                        <td className="px-6 py-4 text-sm text-zinc-300 sm:table-cell">
+                                            <span className="font-medium">{grade.opis || 'Ocena cząstkowa'}</span>
+                                            <span className="block text-xs text-zinc-500 mt-0.5">Waga: {grade.waga}</span>
                                         </td>
                                         <td className="px-6 py-4 text-xs text-zinc-500 hidden sm:table-cell">
                                             {new Date(grade.data_wystawienia).toLocaleDateString()}
@@ -329,13 +376,21 @@ const DashboardHome: React.FC = () => {
                  <div className="space-y-4">
                      {data?.recentMessages && data.recentMessages.length > 0 ? (
                          data.recentMessages.map((msg) => (
-                            <div key={msg.id} className="bg-zinc-900/30 rounded-xl border border-zinc-800 p-4 hover:border-zinc-700 transition-colors flex gap-4 items-start">
+                            <div
+                                key={msg.id}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => openMessage(msg)}
+                                onKeyDown={(e) => e.key === 'Enter' && openMessage(msg)}
+                                className="bg-zinc-900/30 rounded-xl border border-zinc-800 p-4 hover:border-zinc-700 transition-colors flex gap-4 items-start cursor-pointer"
+                            >
                                 <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${msg.przeczytana ? 'bg-zinc-700' : 'bg-blue-500'}`}></div>
                                 <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <p className="font-semibold text-zinc-200 text-sm">{msg.temat}</p>
-                                        <span className="text-[10px] text-zinc-600 border border-zinc-800 px-1.5 rounded">Od: {msg.senderName}</span>
-                                    </div>
+                                    <p className="font-semibold text-zinc-200 text-sm mb-1">{msg.temat}</p>
+                                    <p className="text-sm text-zinc-400 mb-1.5">
+                                        <span className="text-zinc-500 font-medium">Od:</span>{' '}
+                                        <span className="text-zinc-300">{msg.senderName}</span>
+                                    </p>
                                     <p className="text-zinc-400 text-sm line-clamp-2">{msg.tresc}</p>
                                     <p className="text-xs text-zinc-600 mt-2">{new Date(msg.data_wyslania).toLocaleString()}</p>
                                 </div>
@@ -348,6 +403,72 @@ const DashboardHome: React.FC = () => {
                      )}
                  </div>
             </div>
+
+            {/* Grade detail modal */}
+            {gradeModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setGradeModal(null)}>
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-zinc-100 mb-4">Szczegóły oceny</h3>
+                        <dl className="space-y-3 text-sm">
+                            <div>
+                                <dt className="text-zinc-500 font-medium">Przedmiot</dt>
+                                <dd className="text-zinc-200">{gradeModal.subjectName}</dd>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div>
+                                    <dt className="text-zinc-500 font-medium">Ocena</dt>
+                                    <dd>
+                                        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-lg text-lg font-bold border ${getGradeColor(gradeModal.wartosc)}`}>
+                                            {formatGradeValue(gradeModal.wartosc)}
+                                        </span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt className="text-zinc-500 font-medium">Waga</dt>
+                                    <dd className="text-zinc-200">{gradeModal.waga}</dd>
+                                </div>
+                            </div>
+                            <div>
+                                <dt className="text-zinc-500 font-medium">Kategoria / Opis</dt>
+                                <dd className="text-zinc-300">{gradeModal.opis || 'Ocena cząstkowa'}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-zinc-500 font-medium">Data wystawienia</dt>
+                                <dd className="text-zinc-300">{new Date(gradeModal.data_wystawienia).toLocaleDateString('pl-PL')}</dd>
+                            </div>
+                        </dl>
+                        <button type="button" onClick={() => setGradeModal(null)} className="mt-6 w-full py-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 font-medium">
+                            Zamknij
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Message detail modal */}
+            {messageModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setMessageModal(null)}>
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-zinc-800">
+                            <h3 className="text-lg font-bold text-zinc-100 mb-2">{messageModal.temat}</h3>
+                            <p className="text-sm text-zinc-400">
+                                <span className="text-zinc-500 font-medium">Od:</span>{' '}
+                                <span className="text-zinc-300">{messageModal.senderName}</span>
+                            </p>
+                            <p className="text-xs text-zinc-500 mt-1">
+                                {new Date(messageModal.data_wyslania).toLocaleString('pl-PL')}
+                            </p>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <p className="text-zinc-300 text-sm whitespace-pre-wrap">{messageModal.tresc}</p>
+                        </div>
+                        <div className="p-4 border-t border-zinc-800">
+                            <button type="button" onClick={() => setMessageModal(null)} className="w-full py-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 font-medium">
+                                Zamknij
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

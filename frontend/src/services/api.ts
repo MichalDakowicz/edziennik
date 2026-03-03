@@ -39,7 +39,8 @@ export interface Attendance {
     Data: string;
     uczen: number;
     godzina_lekcyjna: number;
-    status: number; // Status ID
+    /** Status ID (number), null, lub obiekt z API { id, Wartosc } */
+    status: number | null | { id?: number; Wartosc?: string; wartosc?: string };
 }
 
 export interface LessonHour {
@@ -160,6 +161,16 @@ export const getTimetablePlan = async (classId: number): Promise<TimetablePlan[]
     return fetchWithAuth(`/plany-zajec/?klasa_id=${classId}`);
 };
 
+export interface ClassInfo {
+    id: number;
+    nazwa: string | null;
+    numer: number | null;
+}
+
+export const getClass = async (classId: number): Promise<ClassInfo> => {
+    return fetchWithAuth(`/klasy/${classId}/`);
+};
+
 export const getZajecia = async (): Promise<Zajecia[]> => {
     return fetchWithAuth('/zajecia/');
 };
@@ -174,6 +185,13 @@ export const getMessages = async (userId: number): Promise<Message[]> => {
         return [];
     }
     return fetchWithAuth(`/wiadomosci/?odbiorca=${userId}`);
+};
+
+export const patchMessage = async (id: number, data: Partial<Pick<Message, 'przeczytana'>>): Promise<Message> => {
+    return fetchWithAuth(`/wiadomosci/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+    });
 };
 
 export const getDaysOfWeek = async (): Promise<{id: number, Nazwa: string, Numer: number}[]> => {

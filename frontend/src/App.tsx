@@ -5,6 +5,7 @@ import DashboardHome from './components/DashboardHome';
 import Grades from './components/Grades';
 import Attendance from './components/Attendance';
 import Timetable from './components/Timetable';
+import Messages from './components/Messages';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="grades" element={<Grades />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="timetable" element={<Timetable />} />
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTimetablePlan, getTimetableEntries, getDaysOfWeek, getLessonHours, getSubjects, getZajecia } from '../services/api';
+import { getTimetablePlan, getTimetableEntries, getDaysOfWeek, getLessonHours, getSubjects, getZajecia, getClass } from '../services/api';
 import { getCurrentUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,7 @@ const Timetable: React.FC = () => {
   const [days, setDays] = useState<string[]>([]);
   const [hours, setHours] = useState<string[]>([]);
   const [todayName, setTodayName] = useState<string>('');
+  const [className, setClassName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -28,13 +29,19 @@ const Timetable: React.FC = () => {
             return;
         }
 
-        const [plans, daysData, hoursData, subjects, zajecia] = await Promise.all([
+        const [klasa, plans, daysData, hoursData, subjects, zajecia] = await Promise.all([
+          getClass(user.classId),
           getTimetablePlan(user.classId),
           getDaysOfWeek(),
           getLessonHours(),
           getSubjects(),
           getZajecia()
         ]);
+
+        const numer = (klasa as any).numer ?? (klasa as any).Numer;
+        const nazwa = (klasa as any).nazwa ?? (klasa as any).Nazwa;
+        const classLabel = numer != null && nazwa ? `${numer} ${nazwa}` : (nazwa || `#${user.classId}`);
+        setClassName(classLabel);
 
         if (!plans || plans.length === 0) {
           setError("Brak aktywnego planu zajęć dla twojej klasy.");
@@ -127,7 +134,7 @@ const Timetable: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Plan Lekcji</h2>
         <span className="text-zinc-500 text-sm bg-zinc-900/50 px-3 py-1 rounded-full border border-zinc-800">
-            Klasa {getCurrentUser()?.classId ? '...' : ''}
+            Klasa {className || '—'}
         </span>
       </div>
 

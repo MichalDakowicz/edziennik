@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Home, ClipboardList, Calendar, Clock, LogOut } from 'lucide-react';
+import { Home, ClipboardList, Calendar, Clock, Mail, LogOut } from 'lucide-react';
 import { logout } from '../services/auth';
 
 const Layout: React.FC = () => {
@@ -47,6 +47,13 @@ const Layout: React.FC = () => {
           >
             <Clock size={20} />
             <span>Plan lekcji</span>
+          </a>
+          <a
+            onClick={() => navigate('/dashboard/messages')}
+            className="flex items-center space-x-3 text-zinc-400 p-3 rounded-lg hover:bg-zinc-900 cursor-pointer hover:text-zinc-100 transition duration-200"
+          >
+            <Mail size={20} />
+            <span>Wiadomości</span>
           </a>
         </nav>
         <div className="p-4 border-t border-zinc-800">

@@ -27,11 +27,15 @@ const getGradeColor = (value: string | number) => {
     return 'bg-red-900/20 text-red-400 border-red-900/30';
 };
 
+type GradeModalState = { grade: Grade; subjectName: string } | null;
+
 const Grades: React.FC = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [subjectsMap, setSubjectsMap] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [gradeModal, setGradeModal] = useState<GradeModalState>(null);
+  const [subjectSearch, setSubjectSearch] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,12 +73,32 @@ const Grades: React.FC = () => {
 
   // Group by subject
   const subjectIds = Array.from(new Set(grades.map(g => g.przedmiot)));
+  const searchLower = subjectSearch.trim().toLowerCase();
+  const filteredSubjectIds = searchLower
+    ? subjectIds.filter(id => (subjectsMap.get(id) || `Przedmiot ${id}`).toLowerCase().includes(searchLower))
+    : subjectIds;
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-8 text-zinc-100 tracking-tight">Oceny</h2>
+      <h2 className="text-3xl font-bold mb-6 text-zinc-100 tracking-tight">Oceny</h2>
+      <div className="mb-6">
+        <label htmlFor="subject-search" className="sr-only">Szukaj przedmiotu</label>
+        <input
+          id="subject-search"
+          type="search"
+          placeholder="Szukaj przedmiotu..."
+          value={subjectSearch}
+          onChange={(e) => setSubjectSearch(e.target.value)}
+          className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+        />
+        {subjectSearch.trim() && (
+          <p className="text-sm text-zinc-500 mt-2">
+            Znaleziono {filteredSubjectIds.length} z {subjectIds.length} przedmiotów
+          </p>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {subjectIds.map(subjectId => {
+        {filteredSubjectIds.map(subjectId => {
           const subjectName = subjectsMap.get(subjectId) || `Przedmiot ${subjectId}`;
           const subjectGrades = grades.filter(g => g.przedmiot === subjectId);
           
@@ -93,7 +117,14 @@ const Grades: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {subjectGrades.map(grade => (
-                  <div key={grade.id} className="flex justify-between items-center p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg group hover:border-zinc-700 transition-colors">
+                  <div
+                    key={grade.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setGradeModal({ grade, subjectName })}
+                    onKeyDown={(e) => e.key === 'Enter' && setGradeModal({ grade, subjectName })}
+                    className="flex justify-between items-center p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg group hover:border-zinc-700 transition-colors cursor-pointer"
+                  >
                     <div className="flex flex-col">
                       <span className="font-medium text-zinc-300 text-sm">{grade.opis || 'Ocena'}</span>
                       <span className="text-xs text-zinc-500">{new Date(grade.data_wystawienia).toLocaleDateString()} • Waga: {grade.waga}</span>
@@ -108,6 +139,46 @@ const Grades: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Grade detail modal */}
+      {gradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setGradeModal(null)}>
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-zinc-100 mb-4">Szczegóły oceny</h3>
+            <dl className="space-y-3 text-sm">
+              <div>
+                <dt className="text-zinc-500 font-medium">Przedmiot</dt>
+                <dd className="text-zinc-200">{gradeModal.subjectName}</dd>
+              </div>
+              <div className="flex items-center gap-3">
+                <div>
+                  <dt className="text-zinc-500 font-medium">Ocena</dt>
+                  <dd>
+                    <span className={`inline-flex items-center justify-center w-10 h-10 rounded-lg text-lg font-bold border ${getGradeColor(gradeModal.grade.wartosc)}`}>
+                      {formatGradeValue(gradeModal.grade.wartosc)}
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-500 font-medium">Waga</dt>
+                  <dd className="text-zinc-200">{gradeModal.grade.waga}</dd>
+                </div>
+              </div>
+              <div>
+                <dt className="text-zinc-500 font-medium">Kategoria / Opis</dt>
+                <dd className="text-zinc-300">{gradeModal.grade.opis || 'Ocena cząstkowa'}</dd>
+              </div>
+              <div>
+                <dt className="text-zinc-500 font-medium">Data wystawienia</dt>
+                <dd className="text-zinc-300">{new Date(gradeModal.grade.data_wystawienia).toLocaleDateString('pl-PL')}</dd>
+              </div>
+            </dl>
+            <button type="button" onClick={() => setGradeModal(null)} className="mt-6 w-full py-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 font-medium">
+              Zamknij
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
