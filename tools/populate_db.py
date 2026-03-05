@@ -122,11 +122,21 @@ def normalize_phone(raw_phone: str) -> str:
     return digits
 
 
+def remove_polish_chars(text: str) -> str:
+    replacements = {
+        'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n', 'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+        'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N', 'Ó': 'O', 'Ś': 'S', 'Ź': 'Z', 'Ż': 'Z'
+    }
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+    return text
+
+
 def create_unique_user(username_prefix="user"):
     first_name = fake.first_name()
     last_name = fake.last_name()
     # username should consist only of first and last name per request
-    base_username = f"{first_name.lower()}_{last_name.lower()}"
+    base_username = remove_polish_chars(f"{first_name.lower()}_{last_name.lower()}")
     username = base_username
     # ensure uniqueness by appending a small numeric suffix if needed
     counter = 1
@@ -135,13 +145,15 @@ def create_unique_user(username_prefix="user"):
         username = f"{base_username}{counter}"
     # keep email unique to avoid collisions
     unique_suffix = fake.unique.uuid4()[:6]
-    email = f"{first_name.lower()}.{last_name.lower()}.{unique_suffix}@example.com"
+    clean_first = remove_polish_chars(first_name.lower())
+    clean_last = remove_polish_chars(last_name.lower())
+    email = f"{clean_first}.{clean_last}.{unique_suffix}@example.com"
     # we use a pre-hashed password to avoid repeated PBKDF2 work
     password = HASHED_PASSWORD
 
     # we already ensured username uniqueness above; ensure email uniqueness as a fallback
     if User.objects.filter(email=email).exists():
-        email = f"{first_name.lower()}.{last_name.lower()}.{fake.unique.uuid4()[:6]}@example.com"
+        email = f"{clean_first}.{clean_last}.{fake.unique.uuid4()[:6]}@example.com"
 
     try:
         # create user with already-hashed password (faster for fixtures)
@@ -353,9 +365,9 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
     obecnosci_to_create = []
 
     status_objs = list(StatusyObecnosci.objects.all())
-    if not status_objs:
-        for v in ["Obecny", "Nieobecny", "Spóźniony", "Usprawiedliwiony"]:
-            StatusyObecnosci.objects.create(Wartosc=v)
+    if not status_objs or len(status_objs) < 5:
+        for v in ["Obecny", "Nieobecny", "Spóźniony", "Usprawiedliwiony", "Zwolnienie"]:
+            StatusyObecnosci.objects.get_or_create(Wartosc=v)
         status_objs = list(StatusyObecnosci.objects.all())
 
     # Ensure there are lesson hours so Frekwencja.godzina_lekcyjna is not left empty
@@ -392,7 +404,8 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
             chosen_pk = random.choice(pks)
             nauczyciel_pk = chosen_pk
 
-            for _ in range(MAX_OCENY_PER_UCZEN_PRZEDMIOT):
+            for _ in range(random.randint(4, MAX_OCENY_PER_UCZEN_PRZEDMIOT)):
+                random_date = timezone.now() - timedelta(days=random.randint(0, 180), hours=random.randint(0, 8))
                 oc = Ocena(
                     uczen_id=uczen.pk,
                     przedmiot_id=przedmiot.pk,
@@ -403,6 +416,7 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
                     czy_punkty=random.choice([True, False]),
                     czy_opisowa=random.choice([True, False]),
                     czy_do_sredniej=random.choice([True, False]),
+                    data_wystawienia=random_date,
                 )
                 oceny_to_create.append(oc)
 
@@ -412,7 +426,25 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
             if day.weekday() >= 5: # skip weekends
                 continue
             for gl in godziny_list:
-                status = random.choice(status_objs) if status_objs else None
+                status = None
+                if status_objs:
+                    # Weights: Obecny ~85%, others split the rest
+                    weights = []
+                    for s in status_objs:
+                        if s.Wartosc == "Obecny":
+                            weights.append(85)
+                        elif s.Wartosc == "Nieobecny":
+                            weights.append(5)
+                        elif s.Wartosc == "Spóźniony":
+                            weights.append(4)
+                        elif s.Wartosc == "Usprawiedliwiony":
+                            weights.append(4)
+                        elif s.Wartosc == "Zwolnienie":
+                            weights.append(2)
+                        else:
+                            weights.append(1)
+                    status = random.choices(status_objs, weights=weights, k=1)[0]
+
                 frek = Frekwencja(
                     Data=day,
                     uczen_id=uczen.pk,
@@ -422,7 +454,11 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
                 obecnosci_to_create.append(frek)
 
     if oceny_to_create:
+        field = Ocena._meta.get_field("data_wystawienia")
+        original_auto_now_add = field.auto_now_add
+        field.auto_now_add = False
         Ocena.objects.bulk_create(oceny_to_create, batch_size=500)
+        field.auto_now_add = original_auto_now_add
         print(f"  Created {len(oceny_to_create)} oceny")
 
     # Create some OcenaOkresowa and OcenaKoncowa entries
@@ -496,16 +532,22 @@ def populate_punkty_zachowania(uczniowie_qs, nauczyciele_qs):
             nauczyciel_pk = (
                 random.choice(nauczyciele_list) if nauczyciele_list else None
             )
+            random_date = timezone.now() - timedelta(days=random.randint(0, 180), hours=random.randint(0, 8))
             zp = ZachowaniePunkty(
                 uczen_id=uczen.pk,
                 punkty=punkty,
                 opis=opis,
                 nauczyciel_wpisujacy_id=nauczyciel_pk,
+                data_wpisu=random_date,
             )
             to_create.append(zp)
 
     if to_create:
+        field = ZachowaniePunkty._meta.get_field("data_wpisu")
+        original_auto_now_add = field.auto_now_add
+        field.auto_now_add = False
         ZachowaniePunkty.objects.bulk_create(to_create, batch_size=500)
+        field.auto_now_add = original_auto_now_add
         print(f"  Created {len(to_create)} zachowanie punkty")
 
 
@@ -677,7 +719,13 @@ def create_wydarzenia_tematy_prace():
             for _ in range(random.randint(3, 5)):
                 nauc = random.choice(nauczyciele)
                 opis = fake.paragraph(nb_sentences=2)
-                termin = date.today() + timedelta(days=random.randint(1, 30))
+                
+                # Make roughly half of the assignments due in the past, and half in the future
+                if random.choice([True, False]):
+                    termin = date.today() - timedelta(days=random.randint(1, 45))
+                else:
+                    termin = date.today() + timedelta(days=random.randint(1, 30))
+                    
                 PracaDomowa.objects.create(
                     klasa=kl, przedmiot=pr, nauczyciel=nauc, opis=opis, termin=termin
                 )
@@ -700,13 +748,17 @@ def create_rodzice_for_uczniowie(sample_fraction=0.15):
     for uc in random.sample(uczniowie, k=max(1, int(len(uczniowie) * sample_fraction))):
         first = fake.first_name()
         last = fake.last_name()
-        base_username = f"{first.lower()}_{last.lower()}"
+        base_username = remove_polish_chars(f"{first.lower()}_{last.lower()}")
         username = base_username
         counter = 1
         while User.objects.filter(username=username).exists():
             counter += 1
             username = f"{base_username}{counter}"
-        email = f"{first.lower()}.{last.lower()}.{fake.unique.uuid4()[:6]}@example.com"
+            
+        clean_first = remove_polish_chars(first.lower())
+        clean_last = remove_polish_chars(last.lower())
+        email = f"{clean_first}.{clean_last}.{fake.unique.uuid4()[:6]}@example.com"
+        
         user = User.objects.create(
             username=username,
             email=email,
