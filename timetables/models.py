@@ -4,30 +4,34 @@ from users.models import Nauczyciel, Uczen
 
 from utils.models import Przedmiot, Klasa
 
+
 # Create your models here.
 class PlanyZajec(models.Model):
-    klasa = models.ForeignKey(Klasa, on_delete=models.CASCADE, related_name='plany_zajec')
+    klasa = models.ForeignKey(
+        Klasa, on_delete=models.CASCADE, related_name="plany_zajec"
+    )
     ObowiazujeOdDnia = models.DateField()
-    wpisy = models.ManyToManyField('PlanWpis', related_name='plany_zajec', blank=True)
+    wpisy = models.ManyToManyField("PlanWpis", related_name="plany_zajec", blank=True)
+
     class Meta:
         verbose_name_plural = "Plany Zajęć"
 
     def __str__(self):
         return f"Plan dla {self.klasa} od {self.ObowiazujeOdDnia}"
-        
-    
+
 
 class GodzinyLekcyjne(models.Model):
     Numer = models.IntegerField()
     CzasOd = models.TimeField(max_length=45)
     CzasDo = models.TimeField(max_length=45)
-    CzasTrwania = models.IntegerField() 
+    CzasTrwania = models.IntegerField()
 
     class Meta:
         verbose_name_plural = "Godziny Lekcyjne"
 
     def __str__(self):
         return f"G.L. {self.Numer}: {self.CzasOd}-{self.CzasDo}"
+
 
 class DniTygodnia(models.Model):
     Nazwa = models.CharField(max_length=45)
@@ -41,9 +45,16 @@ class DniTygodnia(models.Model):
 
 
 class Zajecia(models.Model):
-    
-    przedmiot = models.ForeignKey(Przedmiot, on_delete=models.CASCADE, related_name='zajecia_przedmiotu') 
-    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.SET_NULL, related_name='zajecia_nauczyciela', null=True,blank=True,
+
+    przedmiot = models.ForeignKey(
+        Przedmiot, on_delete=models.CASCADE, related_name="zajecia_przedmiotu"
+    )
+    nauczyciel = models.ForeignKey(
+        Nauczyciel,
+        on_delete=models.SET_NULL,
+        related_name="zajecia_nauczyciela",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -52,32 +63,51 @@ class Zajecia(models.Model):
     def __str__(self):
         return f"{self.przedmiot} ({self.nauczyciel})"
 
+
 class PlanWpis(models.Model):
     godzina_lekcyjna = models.ForeignKey(GodzinyLekcyjne, on_delete=models.CASCADE)
     dzien_tygodnia = models.ForeignKey(DniTygodnia, on_delete=models.CASCADE)
     zajecia = models.ForeignKey(Zajecia, on_delete=models.CASCADE)
-    
 
     class Meta:
         verbose_name_plural = "Wpisy do Planu"
 
     def __str__(self):
-        
+
         return f"Wpis {self.pk}"
-    
 
 
 class Wydarzenie(models.Model):
     tytul = models.CharField(max_length=200)
     opis = models.TextField()
-    data = models.DateTimeField()
-    
-    # reference models in other apps explicitly (app_label.ModelName)
-    klasa = models.ForeignKey('users.Klasa', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
-    przedmiot = models.ForeignKey('utils.Przedmiot', on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
-    nauczyciel = models.ForeignKey(Nauczyciel, on_delete=models.CASCADE, related_name='wydarzenia', null=True, blank=True)
+    data = models.DateField()
+    calodobowe = models.BooleanField(default=True)
+    godzina_od = models.TimeField(null=True, blank=True)
+    godzina_do = models.TimeField(null=True, blank=True)
 
-    
+    # reference models in other apps explicitly (app_label.ModelName)
+    klasa = models.ForeignKey(
+        "users.Klasa",
+        on_delete=models.CASCADE,
+        related_name="wydarzenia",
+        null=True,
+        blank=True,
+    )
+    przedmiot = models.ForeignKey(
+        "utils.Przedmiot",
+        on_delete=models.CASCADE,
+        related_name="wydarzenia",
+        null=True,
+        blank=True,
+    )
+    nauczyciel = models.ForeignKey(
+        Nauczyciel,
+        on_delete=models.CASCADE,
+        related_name="wydarzenia",
+        null=True,
+        blank=True,
+    )
+
     objects = models.Manager()
     active = models.Manager()
 
@@ -87,6 +117,4 @@ class Wydarzenie(models.Model):
     class Meta:
         verbose_name = "Wydarzenie"
         verbose_name_plural = "Wydarzenia"
-        ordering = ['-data']
-
-
+        ordering = ["-data"]
