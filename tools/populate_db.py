@@ -57,12 +57,12 @@ from utils.models import Temat, PracaDomowa
 
 fake = Faker("pl_PL")
 
-NUM_NAUCZYCIELE = 40
+NUM_NAUCZYCIELE = 10
 MIN_UCZNIOWIE_PER_KLASA = 20
 MAX_UCZNIOWIE_PER_KLASA = 30
-MAX_OCENY_PER_UCZEN_PRZEDMIOT = 5
-MAX_OBECNOSCI_PER_UCZEN_PER_DAY = 4
-MAX_PUNKTY_ZACHOWANIA_PER_UCZEN = 8
+MAX_OCENY_PER_UCZEN_PRZEDMIOT = 12
+MAX_OBECNOSCI_PER_UCZEN_PER_DAY = 6
+MAX_PUNKTY_ZACHOWANIA_PER_UCZEN = 18
 SCHOOL_YEAR_START = date(2024, 9, 1)
 SCHOOL_YEAR_END = date(2025, 5, 19)
 
@@ -163,19 +163,13 @@ def create_unique_user(username_prefix="user"):
 @transaction.atomic
 def populate_klasy():
     print("Populating Klasy...")
-    roczniki = ["1", "2", "3", "4", "5"]
-    litery_klas = ["aT", "bT", "cT", "aL", "bL"]
-    litery_klas_dla_rocznika_5_zabronione = ["aL", "bL"]
+    # Limiting to 3 specific classes to reduce data
+    klasy_data = [("1", "aT"), ("2", "aT"), ("3", "aT")]
     created = []
-    for rocznik in roczniki:
-        for litera in litery_klas:
-            if rocznik == "5" and litera in litery_klas_dla_rocznika_5_zabronione:
-                continue
-            # per request: Klasa.nazwa should be the letter(s) only and numer the year
-            nazwa_litera = litera
-            numer_val = int(rocznik)
-            klasa, _ = Klasa.objects.get_or_create(nazwa=nazwa_litera, numer=numer_val)
-            created.append(klasa)
+    for rocznik, litera in klasy_data:
+        numer_val = int(rocznik)
+        klasa, _ = Klasa.objects.get_or_create(nazwa=litera, numer=numer_val)
+        created.append(klasa)
     print(f"  Created/ensured {len(created)} klasy")
     return Klasa.objects.filter(nazwa__in=[k.nazwa for k in created])
 
@@ -398,7 +392,7 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
             chosen_pk = random.choice(pks)
             nauczyciel_pk = chosen_pk
 
-            for _ in range(random.randint(0, MAX_OCENY_PER_UCZEN_PRZEDMIOT)):
+            for _ in range(MAX_OCENY_PER_UCZEN_PRZEDMIOT):
                 oc = Ocena(
                     uczen_id=uczen.pk,
                     przedmiot_id=przedmiot.pk,
@@ -412,14 +406,13 @@ def populate_oceny_i_obecnosci(uczniowie_qs, nauczyciele_qs, przedmioty_qs):
                 )
                 oceny_to_create.append(oc)
 
-        # attendance
-        for _ in range((num_school_days // 30)):
-            day = SCHOOL_YEAR_START + timedelta(days=random.randint(0, num_school_days))
-            if day.weekday() >= 5:
+        # attendance: fully populated for every day
+        for i in range(num_school_days):
+            day = SCHOOL_YEAR_START + timedelta(days=i)
+            if day.weekday() >= 5: # skip weekends
                 continue
-            for _ in range(random.randint(1, MAX_OBECNOSCI_PER_UCZEN_PER_DAY)):
+            for gl in godziny_list:
                 status = random.choice(status_objs) if status_objs else None
-                gl = random.choice(godziny_list) if godziny_list else None
                 frek = Frekwencja(
                     Data=day,
                     uczen_id=uczen.pk,
@@ -612,21 +605,47 @@ def create_wydarzenia_tematy_prace():
         return
 
     wydarzenia_created = 0
-    for _ in range(len(klasy) * 3):
-        kl = random.choice(klasy)
-        pr = random.choice(przedmioty)
-        nauc = random.choice(nauczyciele)
-        t = fake.catch_phrase()
-        opis = fake.paragraph(nb_sentences=2)
-        data = timezone.now() + timedelta(days=random.randint(-10, 30))
-        Wydarzenie.objects.create(
-            tytul=t, opis=opis, data=data, klasa=kl, przedmiot=pr, nauczyciel=nauc
-        )
-        wydarzenia_created += 1
+    # Create more events: 15 per class
+    for kl in klasy:
+        for _ in range(15):
+            pr = random.choice(przedmioty)
+            nauc = random.choice(nauczyciele)
+            t = fake.catch_phrase()
+            opis = fake.paragraph(nb_sentences=2)
+            
+            datetime_val = timezone.now() + timedelta(days=random.randint(-10, 30))
+            data_val = datetime_val.date()
+            
+            # Decide if the event is all-day
+            calodobowe = random.choice([True, False])
+            if calodobowe:
+                godzina_od = None
+                godzina_do = None
+            else:
+                # Random duration for non-all-day event
+                godzina_od = time(hour=random.randint(8, 14), minute=random.choice([0, 15, 30, 45]))
+                godzina_do = (
+                    timezone.datetime.combine(data_val, godzina_od) + timedelta(hours=random.randint(1, 3))
+                ).time()
+
+            Wydarzenie.objects.create(
+                tytul=t, 
+                opis=opis, 
+                data=data_val, 
+                calodobowe=calodobowe,
+                godzina_od=godzina_od,
+                godzina_do=godzina_do,
+                klasa=kl, 
+                przedmiot=pr, 
+                nauczyciel=nauc
+            )
+            wydarzenia_created += 1
 
     tematy_created = 0
+    prace_created = 0
     for pr in przedmioty:
-        for _ in range(random.randint(1, 3)):
+        # Create more homeworks/topics
+        for _ in range(random.randint(5, 10)):
             tresc = fake.sentence(nb_words=6)
             data = date.today() - timedelta(days=random.randint(0, 60))
             numer_lekcji = random.randint(1, 6)
@@ -652,14 +671,17 @@ def create_wydarzenia_tematy_prace():
     prace_created = 0
     klasy_cycle = list(klasy)
     for pr in przedmioty:
-        for kl in random.sample(klasy_cycle, k=min(3, len(klasy_cycle))):
-            nauc = random.choice(nauczyciele)
-            opis = fake.paragraph(nb_sentences=2)
-            termin = date.today() + timedelta(days=random.randint(1, 30))
-            PracaDomowa.objects.create(
-                klasa=kl, przedmiot=pr, nauczyciel=nauc, opis=opis, termin=termin
-            )
-            prace_created += 1
+        # Give every class homework for this subject
+        for kl in klasy_cycle:
+            # Create ~3-5 homeworks per class per subject
+            for _ in range(random.randint(3, 5)):
+                nauc = random.choice(nauczyciele)
+                opis = fake.paragraph(nb_sentences=2)
+                termin = date.today() + timedelta(days=random.randint(1, 30))
+                PracaDomowa.objects.create(
+                    klasa=kl, przedmiot=pr, nauczyciel=nauc, opis=opis, termin=termin
+                )
+                prace_created += 1
 
     print(
         f"  Created {wydarzenia_created} wydarzenia, {tematy_created} tematy, {prace_created} prace domowe"
